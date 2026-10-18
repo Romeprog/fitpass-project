@@ -1,0 +1,4363 @@
+/* ==========================================================================
+   FitPass – style.css
+   One stylesheet for every page. Rules that only apply to some pages are
+   scoped with  :where(.app)  /  :where(.auth)  /  :where([data-page="x"])
+   which match the attributes on the <html> tag of each page, e.g.
+   <html class="app" data-page="diet">. :where() adds no specificity, so the
+   cascade behaves exactly as it did when each page had its own <style>.
+   ========================================================================== */
+
+:root {
+    --red: #f44336;
+    --red-dark: #d32f2f;
+    --dark: #1a202c;
+    --darker: #0f1318;
+    --panel: #262433;
+    --white: #ffffff;
+    --gray: #4a5568;
+    --muted: #a0aec0;
+    --green: #48bb78;
+    --green-dark: #2f855a;
+    --yellow: #ecc94b;
+}
+
+/* ── All pages ───────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ── App pages (home, workouts, diet, about, admin) ──────────────────────── */
+
+html:where(.app) {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
+/* ── Login & register ────────────────────────────────────────────────────── */
+
+:where(.auth) body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px 12px;
+    background-image: url(../images/gym.png.avif);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: #0f1318;
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* Dark overlay for depth */
+:where(.auth) body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.65) 0%, rgba(15, 19, 24, 0.5) 100%);
+    z-index: 0;
+}
+
+/* Animated accent line top */
+:where(.auth) body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #f44336, transparent);
+    z-index: 10;
+    animation: scanline 3s ease-in-out infinite;
+}
+
+@keyframes scanline {
+
+    0%,
+    100% {
+        opacity: 0.35;
+        transform: scaleX(0.5);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+:where(.auth) .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    background: rgba(10, 12, 18, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 16px;
+    padding: 44px 40px 40px;
+    color: white;
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 28px;
+}
+
+.brand-icon {
+    width: 36px;
+    height: 36px;
+    background: #f44336;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.brand-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 2px;
+    color: white;
+}
+
+.brand-name span {
+    color: #f44336;
+}
+
+.divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    margin-bottom: 28px;
+}
+
+:where(.auth) .container h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    letter-spacing: 3px;
+    text-align: center;
+    margin-bottom: 8px;
+    color: white;
+    line-height: 1;
+}
+
+:where(.auth) .container h1 span {
+    color: #f44336;
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 28px;
+}
+
+.input-box {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-box .input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 16px;
+    pointer-events: none;
+    transition: color 0.3s;
+    z-index: 2;
+}
+
+.input-box input {
+    width: 100%;
+    padding: 15px 16px 15px 44px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    outline: none;
+    border-radius: 10px;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+
+.input-box input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.input-box input:focus {
+    border-color: rgba(244, 67, 54, 0.6);
+    background: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.12);
+}
+
+:where(.auth) .input-box input.match {
+    border-color: rgba(76, 175, 80, 0.6);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.12);
+}
+
+.input-box input.no-match {
+    border-color: rgba(244, 67, 54, 0.6);
+}
+
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    margin: 8px 0 24px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.remember-forgot label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.remember-forgot label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #f44336;
+    cursor: pointer;
+}
+
+.remember-forgot a {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+
+.remember-forgot a:hover {
+    color: #f44336;
+}
+
+.form-message {
+    display: none;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    background: rgba(244, 67, 54, 0.15);
+    border: 1px solid rgba(244, 67, 54, 0.4);
+    color: #ffb4ae;
+}
+
+:where(.auth) .form-message.show {
+    display: block;
+}
+
+.form-message.info {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.btn {
+    width: 100%;
+    height: 50px;
+    background: #f44336;
+    border: none;
+    outline: none;
+    text-decoration: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(244, 67, 54, 0.35);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.btn:hover {
+    background: #e53935;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(244, 67, 54, 0.5);
+}
+
+.btn:hover::before {
+    opacity: 1;
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.switch-link {
+    font-size: 13px;
+    margin-top: 24px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.switch-link a {
+    color: var(--red);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.switch-link a:hover {
+    opacity: 0.8;
+}
+
+@media (max-width: 480px) {
+    :where(.auth) .container {
+        padding: 32px 22px 28px;
+    }
+
+}
+
+/* ── home + workouts + diet + about ──────────────────────────────────────── */
+
+:where([data-page="home"], [data-page="workouts"], [data-page="diet"], [data-page="about"]) body {
+    font-family: 'Barlow', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #1d1b26;
+    overflow-x: hidden;
+}
+
+/* ── admin.html only ─────────────────────────────────────────────────────── */
+
+:where([data-page="admin"]) body {
+    font-family: 'Barlow', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #e2e8f0;
+    background: #1d1b26;
+    overflow-x: hidden;
+}
+
+/* ── App pages (home, workouts, diet, about, admin) ──────────────────────── */
+
+:where(.app) a {
+    color: inherit;
+}
+
+:where(.app) button {
+    font-family: inherit;
+}
+
+:where(.app) :focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
+}
+
+:where(.app) .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: auto;
+    padding: 0 20px;
+}
+
+/* ── NAVBAR ── */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgba(26, 32, 44, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.navbar.scrolled {
+    background-color: rgba(26, 32, 44, 1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 92%;
+    margin: auto;
+    padding: 16px 20px;
+}
+
+.logo {
+    font-size: 28.8px;
+    font-weight: bold;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.logo span {
+    color: var(--red);
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 34px;
+    align-items: center;
+    transition: 0.5s ease;
+}
+
+/* ── home + workouts + diet + about ──────────────────────────────────────── */
+
+:where([data-page="home"], [data-page="workouts"], [data-page="diet"], [data-page="about"]) .nav-link {
+    color: #ffffff;
+    text-decoration: none;
+    position: relative;
+}
+
+/* ── admin.html only ─────────────────────────────────────────────────────── */
+
+:where([data-page="admin"]) .nav-link {
+    color: #ffffff;
+    text-decoration: none;
+    position: relative;
+    cursor: pointer;
+}
+
+/* ── App pages (home, workouts, diet, about, admin) ──────────────────────── */
+
+.nav-link:hover {
+    color: var(--red);
+}
+
+.nav-link.active {
+    color: var(--red);
+    font-weight: 600;
+}
+
+/* ── home + workouts + diet + about ──────────────────────────────────────── */
+
+.nav-user {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── App pages (home, workouts, diet, about, admin) ──────────────────────── */
+
+.btn-logout {
+    display: inline-block;
+    background: var(--red);
+    color: #ffffff;
+    border: none;
+    padding: 11px 25px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* ── home + workouts + diet + about ──────────────────────────────────────── */
+
+:where([data-page="home"], [data-page="workouts"], [data-page="diet"], [data-page="about"]) .btn-logout:hover {
+    background-color: var(--red);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(245, 101, 101, 0.4);
+}
+
+/* ── admin.html only ─────────────────────────────────────────────────────── */
+
+:where([data-page="admin"]) .btn-logout:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(245, 101, 101, 0.4);
+}
+
+/* ── App pages (home, workouts, diet, about, admin) ──────────────────────── */
+
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+}
+
+.hamburger span {
+    width: 25px;
+    height: 3px;
+    background-color: #ffffff;
+    margin: 4px 0;
+    transition: 0.5s;
+}
+
+/* ── home + workouts + diet + about ──────────────────────────────────────── */
+
+/* ── BUTTONS ── */
+:where([data-page="home"], [data-page="workouts"], [data-page="diet"], [data-page="about"]) .cta-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    background: var(--red);
+    color: #ffffff;
+    border: none;
+    padding: 16px 48px;
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+/* ── admin.html only ─────────────────────────────────────────────────────── */
+
+/* ── BUTTONS ── */
+:where([data-page="admin"]) .cta-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    background: var(--red);
+    color: #ffffff;
+    border: none;
+    padding: 12px 30px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+/* ── App pages (home, workouts, diet, about, admin) ──────────────────────── */
+
+.cta-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(245, 101, 101, 0.4);
+}
+
+/* ── home + workouts + diet + about ──────────────────────────────────────── */
+
+.cta-btn-outline {
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    padding: 14px 40px;
+    font-size: 17px;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.cta-btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-3px);
+}
+
+/* ── REVEAL ON SCROLL ── */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-80px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeRight {
+    from {
+        opacity: 0;
+        transform: translateX(80px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ── App pages (home, workouts, diet, about, admin) ──────────────────────── */
+
+/* ── MODAL ── */
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ── TOAST ── */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translate(-50%, 30px);
+    background: #1a202c;
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 8px;
+    border-left: 4px solid var(--green);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s;
+    z-index: 3000;
+    max-width: 90vw;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.toast.error {
+    border-left-color: var(--red);
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+/* ── home + workouts + diet + about ──────────────────────────────────────── */
+
+:where([data-page="home"], [data-page="workouts"], [data-page="diet"], [data-page="about"]) .modal-box {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── admin.html only ─────────────────────────────────────────────────────── */
+
+:where([data-page="admin"]) .modal-box {
+    background: #ffffff;
+    color: #1d1b26;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── App pages (home, workouts, diet, about, admin) ──────────────────────── */
+
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.25);
+    border: none;
+    color: #ffffff;
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    z-index: 10;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* ── home + workouts + diet + about ──────────────────────────────────────── */
+
+:where([data-page="home"], [data-page="workouts"], [data-page="diet"], [data-page="about"]) .modal-header {
+    padding: 28px 24px 24px;
+    border-radius: 16px 16px 0 0;
+    color: #fff;
+}
+
+/* ── admin.html only ─────────────────────────────────────────────────────── */
+
+:where([data-page="admin"]) .modal-header {
+    padding: 28px 24px 24px;
+    border-radius: 16px 16px 0 0;
+    color: #fff;
+    background: linear-gradient(135deg, var(--red), var(--red-dark));
+}
+
+/* ── App pages (home, workouts, diet, about, admin) ──────────────────────── */
+
+.modal-header h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    padding-right: 36px;
+}
+
+.modal-header p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.88);
+    line-height: 1.5;
+}
+
+/* ── admin.html only ─────────────────────────────────────────────────────── */
+
+.modal-form {
+    padding: 22px 24px 26px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* ── App pages (home, workouts, diet, about, admin) ──────────────────────── */
+
+/* ── FOOTER ── */
+.footer {
+    background: #282535;
+    color: white;
+    padding: 48px 0 16px;
+}
+
+:where(.app) .footer .container {
+    max-width: 1400px;
+    padding: 0 30px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: 1.5fr 3fr;
+    gap: 60px;
+    margin-bottom: 32px;
+}
+
+.footer-brand h3 {
+    font-size: 28.8px;
+    margin-bottom: 8px;
+}
+
+.footer-brand h3 span {
+    color: var(--red);
+}
+
+.footer-brand p {
+    color: var(--muted);
+}
+
+.footer-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+    gap: 50px;
+}
+
+.footer-column h4 {
+    font-size: 19.2px;
+    margin-bottom: 20px;
+    color: var(--red);
+}
+
+.footer-column ul {
+    list-style: none;
+}
+
+.footer-column li {
+    margin-bottom: 11.2px;
+    color: var(--muted);
+}
+
+.workout-categories ul {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 24px;
+}
+
+.footer-column a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-column a:hover {
+    color: white;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 32px;
+    border-top: 1px solid #4a5568;
+    color: var(--muted);
+}
+
+@media (max-width: 767px) {
+    .nav-menu {
+        position: absolute;
+        left: -100%;
+        top: 100%;
+        flex-direction: column;
+        gap: 22px;
+        background-color: #1a202c;
+        width: 100%;
+        text-align: center;
+        padding: 32px 0;
+    }
+
+    .nav-menu.active {
+        left: 0;
+    }
+
+    .nav-container {
+        padding: 16px;
+    }
+
+    .hamburger {
+        display: flex;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 30px;
+    }
+
+    .footer-links {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .workout-categories ul {
+        justify-items: center;
+    }
+
+}
+
+/* ── home.html only ──────────────────────────────────────────────────────── */
+
+/* ── HERO ── */
+.home-section {
+    min-height: 100vh;
+    width: 100%;
+    background: linear-gradient(to bottom, rgba(15, 19, 24, 0.6) 0%, rgba(15, 19, 24, 0.4) 50%, rgba(15, 19, 24, 0.85) 100%),
+        url(../images/battle-rope.jpg) center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #ffffff;
+    padding-top: 70px;
+}
+
+.home-content {
+    width: 100%;
+    padding: 20px;
+}
+
+:where([data-page="home"]) .hero-label {
+    display: inline-block;
+    background: var(--red);
+    color: #ffffff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 3px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s ease both;
+}
+
+.main-heading {
+    font-size: clamp(38px, 8vw, 82px);
+    font-weight: 900;
+    margin-bottom: 24px;
+    line-height: 1.0;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+    animation: fadeUp 0.7s ease 0.1s both;
+}
+
+.main-heading em {
+    color: var(--red);
+    font-style: normal;
+}
+
+.tagline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(16px, 2.4vw, 21px);
+    margin-bottom: 40px;
+    font-weight: 500;
+    line-height: 1.8;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+    animation: fadeUp 0.7s ease 0.2s both;
+}
+
+.hero-ctas {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 0.8s ease 0.3s both;
+}
+
+/* ── TODAY AT A GLANCE ── */
+.today-section {
+    background: #1d1b26;
+    padding: 80px 0;
+    color: #fff;
+}
+
+:where([data-page="home"]) .eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(34px, 5vw, 48px);
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+}
+
+.today-section .section-title {
+    color: #fff;
+    margin-bottom: 40px;
+}
+
+.section-title span {
+    color: var(--red);
+}
+
+.glance-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.glance-card {
+    display: block;
+    text-decoration: none;
+    background: #262433;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 4px solid var(--red);
+    border-radius: 10px;
+    padding: 26px 24px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glance-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+:where([data-page="home"]) .glance-card.green {
+    border-top-color: var(--green);
+}
+
+.glance-label {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.glance-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 46px;
+    font-weight: 900;
+    line-height: 1.1;
+    margin: 6px 0 2px;
+}
+
+.glance-value small {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.glance-note {
+    font-size: 14px;
+    color: var(--muted);
+}
+
+/* ── WHY FITPASS ── */
+.why-section {
+    padding: 100px 0;
+    background: #f0f0f0;
+}
+
+:where([data-page="home"]) .why-section .eyebrow {
+    margin-bottom: 12px;
+}
+
+.why-section .section-title {
+    color: #1a202c;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: #718096;
+    max-width: 560px;
+    margin: 0 auto 64px;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+.feature-card {
+    background: #ffffff;
+    padding: 40px 32px;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--red);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.10);
+}
+
+.feature-card:hover::before {
+    transform: scaleX(1);
+}
+
+.feature-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(244, 67, 54, 0.10);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.feature-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke: var(--red);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.feature-card h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.feature-card p {
+    color: #718096;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* ── CTA BANNER ── */
+.cta-section {
+    padding: 100px 0;
+    background: #f7fafc;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-section::before {
+    content: 'FITPASS';
+    position: absolute;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(90px, 20vw, 200px);
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.04);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    user-select: none;
+    pointer-events: none;
+}
+
+.cta-inner {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.cta-inner h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(36px, 6vw, 60px);
+    font-weight: 900;
+    color: #1d1b26;
+    text-transform: uppercase;
+    line-height: 1.05;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+}
+
+.cta-inner h2 span {
+    color: var(--red);
+}
+
+.cta-inner p {
+    color: #718096;
+    font-size: 17px;
+    max-width: 520px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+}
+
+.cta-inner .cta-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cta-inner .cta-btn-outline {
+    color: #1d1b26;
+    border-color: #1d1b26;
+}
+
+.cta-inner .cta-btn-outline:hover {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: #1d1b26;
+}
+
+@media (max-width: 992px) {
+    .glance-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 767px) {
+
+    .glance-grid,
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* ── workouts + diet ─────────────────────────────────────────────────────── */
+
+body.tracker {
+    background: #1d1b26;
+    color: #e2e8f0;
+}
+
+/* ── workouts + diet + admin ─────────────────────────────────────────────── */
+
+/* ── PAGE ── */
+:where([data-page="workouts"], [data-page="diet"], [data-page="admin"]) .page-hero {
+    padding: 130px 0 40px;
+    background: linear-gradient(180deg, #0f1318 0%, #1d1b26 100%);
+}
+
+:where([data-page="workouts"], [data-page="diet"], [data-page="admin"]) .eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 10px;
+}
+
+.page-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 1;
+    color: #fff;
+    margin-bottom: 16px;
+}
+
+.page-title span {
+    color: var(--red);
+}
+
+.page-sub {
+    max-width: 640px;
+    color: var(--muted);
+    font-size: 17px;
+    margin-bottom: 32px;
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.stat {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 4px solid var(--red);
+    padding: 18px 22px;
+    border-radius: 6px;
+}
+
+.stat b {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 40px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+}
+
+.stat span {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+/* ── workouts + diet ─────────────────────────────────────────────────────── */
+
+:where([data-page="workouts"], [data-page="diet"]) .section {
+    padding: 40px 0 56px;
+}
+
+:where([data-page="workouts"], [data-page="diet"]) .section.alt {
+    background: #181620;
+    padding-bottom: 72px;
+}
+
+/* ── about.html only ─────────────────────────────────────────────────────── */
+
+/* ── ABOUT HERO ── */
+.about-hero {
+    min-height: 100vh;
+    background-color: #1a202c;
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.about-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -10%;
+    width: 55%;
+    height: 100%;
+    background: var(--red);
+    clip-path: polygon(18% 0, 100% 0, 100% 100%, 0% 100%);
+    z-index: 0;
+}
+
+.about-hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -10%;
+    width: 55%;
+    height: 100%;
+    background: rgba(15, 19, 24, 0.55);
+    clip-path: polygon(18% 0, 100% 0, 100% 100%, 0% 100%);
+    z-index: 1;
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 92%;
+    max-width: 1200px;
+    margin: auto;
+    padding: 100px 0 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+
+:where([data-page="about"]) .hero-label {
+    display: inline-block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--red);
+    border-left: 3px solid var(--red);
+    padding-left: 12px;
+    margin-bottom: 24px;
+    animation: fadeLeft 0.6s ease both;
+}
+
+.hero-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(52px, 7vw, 96px);
+    font-weight: 900;
+    line-height: 0.92;
+    color: #ffffff;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    animation: fadeLeft 0.7s ease 0.1s both;
+}
+
+.hero-title em {
+    font-style: normal;
+    color: var(--red);
+    display: block;
+}
+
+.hero-desc {
+    font-size: 17px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.8;
+    max-width: 480px;
+    animation: fadeLeft 0.7s ease 0.2s both;
+}
+
+.hero-right {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 4px solid var(--red);
+    padding: 28px 32px;
+    backdrop-filter: blur(6px);
+    transition: background 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    animation: fadeRight 0.8s ease forwards;
+}
+
+.stat-card:nth-child(1) {
+    animation-delay: 0.3s;
+}
+
+.stat-card:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.stat-card:nth-child(3) {
+    animation-delay: 0.7s;
+}
+
+.stat-card:hover {
+    background: rgba(255, 255, 255, 0.09);
+    transform: translateX(6px);
+}
+
+.stat-number {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 48px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.stat-number span {
+    color: var(--red);
+}
+
+.stat-label {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    margin-top: 4px;
+}
+
+/* ── VALUES ── */
+.values-section {
+    background: #e2e8f0;
+    padding: 120px 0;
+}
+
+.section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--red);
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.section-heading {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 900;
+    text-transform: uppercase;
+    text-align: center;
+    color: #1a202c;
+    margin-bottom: 47px;
+    line-height: 1;
+}
+
+.section-heading span {
+    color: var(--red);
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: #e2e8f0;
+}
+
+.value-card {
+    background: #fff;
+    padding: 52px 40px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.35s ease;
+    cursor: default;
+}
+
+.value-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--red);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s ease;
+}
+
+.value-card:hover::before {
+    transform: scaleX(1);
+}
+
+.value-card:hover {
+    background: #1a202c;
+}
+
+.value-card:hover .value-title {
+    color: #ffffff;
+}
+
+.value-card:hover .value-text {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.value-icon {
+    font-size: 36px;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.value-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.05);
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    line-height: 1;
+    pointer-events: none;
+    transition: color 0.35s ease;
+}
+
+.value-card:hover .value-num {
+    color: rgba(255, 255, 255, 0.07);
+}
+
+.value-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #1a202c;
+    margin-bottom: 14px;
+    transition: color 0.35s ease;
+}
+
+.value-text {
+    font-size: 15px;
+    color: #718096;
+    line-height: 1.75;
+    transition: color 0.35s ease;
+}
+
+/* ── QUOTE ── */
+.quote-banner {
+    background: #0f1318;
+    padding: 100px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.quote-banner::before {
+    content: '"';
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 400px;
+    font-weight: 900;
+    color: rgba(244, 67, 54, 0.06);
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+    pointer-events: none;
+}
+
+.quote-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #ffffff;
+    max-width: 860px;
+    margin: 0 auto 28px;
+    line-height: 1.1;
+    position: relative;
+    z-index: 1;
+}
+
+.quote-text span {
+    color: var(--red);
+}
+
+.quote-author {
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    position: relative;
+    z-index: 1;
+}
+
+/* ── FEATURES ROW ── */
+.features-section {
+    background: #ffffff;
+    padding: 120px 0;
+}
+
+.features-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+}
+
+.features-left .section-label,
+.features-left .section-heading {
+    text-align: left;
+}
+
+.features-body {
+    font-size: 16px;
+    color: #718096;
+    line-height: 1.85;
+    margin-bottom: 40px;
+}
+
+.feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 15px;
+    color: #1a202c;
+    font-weight: 500;
+}
+
+.feature-list li::before {
+    content: '';
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border-radius: 50%;
+    background-color: var(--red);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-size: 14px;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-top: 1px;
+}
+
+.img-block {
+    background: #1a202c;
+    aspect-ratio: 4/5;
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+}
+
+.img-block img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+}
+
+.reveal-left {
+    opacity: 0;
+    transform: translateX(-80px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal-right {
+    opacity: 0;
+    transform: translateX(80px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+:where([data-page="about"]) .reveal-left.visible,
+:where([data-page="about"]) .reveal-right.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+@media (max-width: 992px) {
+    .hero-inner {
+        grid-template-columns: 1fr;
+        gap: 48px;
+    }
+
+    .values-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .features-row {
+        grid-template-columns: 1fr;
+    }
+
+    .features-right {
+        order: -1;
+    }
+
+    .img-block {
+        aspect-ratio: 16/9;
+    }
+
+}
+
+@media (max-width: 767px) {
+    .values-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-hero::before,
+    .about-hero::after {
+        display: none;
+    }
+
+    .about-hero {
+        background: linear-gradient(160deg, #1a202c 60%, #2a1010 100%);
+    }
+
+    .stat-number {
+        font-size: 36px;
+    }
+
+}
+
+/* ── admin.html only ─────────────────────────────────────────────────────── */
+
+:where([data-page="admin"]) .section {
+    padding: 40px 0 72px;
+    min-height: 420px;
+}
+
+/* ── workouts + diet + admin ─────────────────────────────────────────────── */
+
+.section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+}
+
+.section-head h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #cbd5e0;
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-ghost:hover {
+    border-color: var(--red);
+    color: #fff;
+}
+
+/* ── diet.html only ──────────────────────────────────────────────────────── */
+
+:where([data-page="diet"]) .page-hero {
+    padding-bottom: 28px;
+}
+
+.date-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.date-nav button,
+.date-nav input {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.date-nav button:hover {
+    border-color: var(--red);
+}
+
+.date-nav input {
+    color-scheme: dark;
+}
+
+.date-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    margin-right: 8px;
+}
+
+:where([data-page="diet"]) .panel {
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    padding: 24px;
+}
+
+:where([data-page="diet"]) .panel h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 16px;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: 220px 1fr 240px;
+    gap: 32px;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.ring-wrap {
+    position: relative;
+    width: 190px;
+    height: 190px;
+    margin: auto;
+}
+
+.ring {
+    width: 100%;
+    height: 100%;
+}
+
+.ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 10;
+}
+
+.ring-fg {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 326.73;
+    stroke-dashoffset: 326.73;
+    transition: stroke-dashoffset 0.6s ease, stroke 0.3s;
+}
+
+:where([data-page="diet"]) .ring-fg.over {
+    stroke: #ecc94b;
+}
+
+.ring-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.ring-text b {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 44px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+}
+
+.ring-text span {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.ring-note {
+    font-size: 13px;
+    margin-top: 4px;
+    color: var(--green);
+    font-weight: 600;
+}
+
+:where([data-page="diet"]) .ring-note.over {
+    color: #ecc94b;
+}
+
+:where([data-page="diet"]) .macro {
+    margin-bottom: 14px;
+}
+
+.macro-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #cbd5e0;
+}
+
+.macro-top b {
+    color: #fff;
+}
+
+.bar {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.bar i {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    transition: width 0.5s ease;
+}
+
+:where([data-page="diet"]) .bar i.p {
+    background: #63b3ed;
+}
+
+:where([data-page="diet"]) .bar i.c {
+    background: #f6ad55;
+}
+
+:where([data-page="diet"]) .bar i.f {
+    background: #b794f4;
+}
+
+.extra h4 {
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+}
+
+.extra-count {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #cbd5e0;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+    align-items: start;
+}
+
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.meal-group {
+    margin-bottom: 18px;
+}
+
+.meal-group:last-child {
+    margin-bottom: 0;
+}
+
+.meal-title {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    color: #fff;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 8px;
+}
+
+.meal-title span {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.food-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+
+.food-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.food-main b {
+    display: block;
+    color: #fff;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.food-main span {
+    font-size: 12.5px;
+    color: var(--muted);
+}
+
+.food-cal {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--red);
+    white-space: nowrap;
+}
+
+:where([data-page="diet"]) .icon-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+/* ── admin.html only ─────────────────────────────────────────────────────── */
+
+:where([data-page="admin"]) .btn-red {
+    padding: 12px 28px;
+    background: var(--red);
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.25s;
+    box-shadow: 0 4px 14px rgba(244, 67, 54, 0.3);
+}
+
+.head-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+:where([data-page="admin"]) .search {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-size: 15px;
+    min-width: 220px;
+    font-family: 'Barlow', sans-serif;
+}
+
+:where([data-page="admin"]) .search::placeholder {
+    color: var(--muted);
+}
+
+:where([data-page="admin"]) .search:focus {
+    outline: none;
+    border-color: var(--red);
+}
+
+/* ── workouts + admin ────────────────────────────────────────────────────── */
+
+.filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+}
+
+.chip {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e0;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.chip:hover {
+    border-color: var(--red);
+    color: #fff;
+}
+
+:where([data-page="workouts"], [data-page="admin"]) .chip.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+}
+
+/* ── workouts.html only ──────────────────────────────────────────────────── */
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.w-card {
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+}
+
+.w-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--green);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.w-head {
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    padding: 20px 22px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.w-head h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.w-body {
+    padding: 20px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+}
+
+.w-desc {
+    color: var(--muted);
+    font-size: 15px;
+    flex: 1;
+}
+
+.w-meta {
+    display: flex;
+    gap: 8px 16px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: #cbd5e0;
+}
+
+.btn-green {
+    width: 100%;
+    padding: 12px 0;
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(72, 187, 120, 0.3);
+}
+
+.btn-green:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(72, 187, 120, 0.5);
+}
+
+.btn-green:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* history */
+.history-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-left: 4px solid var(--green);
+    border-radius: 8px;
+    padding: 14px 18px;
+}
+
+.history-item.partial {
+    border-left-color: #ecc94b;
+}
+
+.history-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-main b {
+    color: #fff;
+    font-size: 17px;
+}
+
+.history-main span {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.history-score {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--green);
+}
+
+.history-item.partial .history-score {
+    color: #ecc94b;
+}
+
+.btn-continue {
+    background: #ecc94b;
+    color: #1a202c;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.2s;
+}
+
+.btn-continue:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+:where([data-page="workouts"]) .icon-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+/* ── workouts + diet ─────────────────────────────────────────────────────── */
+
+.icon-btn:hover {
+    color: var(--red);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── workouts.html only ──────────────────────────────────────────────────── */
+
+:where([data-page="workouts"]) .empty {
+    color: var(--muted);
+    padding: 28px;
+    text-align: center;
+    background: var(--panel);
+    border-radius: 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+/* workout session modal */
+.session-header {
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+}
+
+.progress-wrap {
+    padding: 18px 24px 4px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 8px;
+}
+
+.progress-bar {
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--green), var(--green-dark));
+    transition: width 0.3s ease;
+}
+
+.exercise-list {
+    list-style: none;
+    padding: 14px 24px 8px;
+}
+
+.ex-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    background: #f7fafc;
+    border: 1px solid transparent;
+    border-left: 3px solid var(--green);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #4a5568;
+    transition: 0.2s;
+}
+
+.ex-row:hover {
+    background: #edf2f7;
+}
+
+:where([data-page="workouts"]) .check {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border-radius: 6px;
+    border: 2px solid #cbd5e0;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    transition: 0.2s;
+}
+
+.ex-name {
+    font-weight: 600;
+    color: #2d3748;
+    flex: 1;
+}
+
+.ex-detail {
+    color: #718096;
+    font-size: 13px;
+    text-align: right;
+}
+
+:where([data-page="workouts"]) .ex-row.done {
+    background: #f0fff4;
+    border-color: #c6f6d5;
+}
+
+:where([data-page="workouts"]) .ex-row.done .check {
+    background: var(--green);
+    border-color: var(--green);
+}
+
+:where([data-page="workouts"]) .ex-row.done .ex-name {
+    text-decoration: line-through;
+    color: #718096;
+}
+
+/* exercise demo */
+.ex-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: stretch;
+}
+
+.ex-item .ex-row {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.ex-help {
+    flex: none;
+    width: 46px;
+    background: #fff;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    transition: 0.2s;
+}
+
+.ex-help:hover {
+    border-color: var(--red);
+    background: #fff5f5;
+}
+
+.demo-overlay {
+    z-index: 2500;
+}
+
+.demo-media {
+    margin: 20px 24px 0;
+    min-height: 220px;
+    background: #1a202c;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.demo-media img,
+.demo-media video {
+    display: block;
+    width: 100%;
+    max-height: 340px;
+    object-fit: contain;
+}
+
+.demo-empty {
+    padding: 28px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.demo-empty strong {
+    display: block;
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.demo-actions {
+    padding: 16px 24px 26px;
+}
+
+.demo-link {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #2d3748;
+    background: #edf2f7;
+    transition: 0.2s;
+}
+
+.demo-link:hover {
+    background: #e2e8f0;
+}
+
+/* ── diet.html only ──────────────────────────────────────────────────────── */
+
+:where([data-page="diet"]) .empty {
+    color: var(--muted);
+    padding: 28px;
+    text-align: center;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* ── diet + admin ────────────────────────────────────────────────────────── */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+:where([data-page="diet"], [data-page="admin"]) .field.full {
+    grid-column: 1 / -1;
+}
+
+/* ── diet.html only ──────────────────────────────────────────────────────── */
+
+:where([data-page="diet"]) .field label {
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+:where([data-page="diet"]) .field input,
+:where([data-page="diet"]) .field select {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: inherit;
+    width: 100%;
+}
+
+:where([data-page="diet"]) .field select option {
+    color: #1a202c;
+}
+
+:where([data-page="diet"]) .field select optgroup {
+    color: #d32f2f;
+    font-style: normal;
+    font-weight: 700;
+}
+
+:where([data-page="diet"]) .field input:focus,
+:where([data-page="diet"]) .field select:focus {
+    outline: none;
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.15);
+}
+
+:where([data-page="diet"]) .btn-red {
+    width: 100%;
+    padding: 12px 0;
+    background: var(--red);
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.25s;
+    box-shadow: 0 4px 14px rgba(244, 67, 54, 0.3);
+}
+
+/* ── diet + admin ────────────────────────────────────────────────────────── */
+
+.btn-red:hover {
+    background: var(--red-dark);
+    transform: translateY(-2px);
+}
+
+/* ── diet.html only ──────────────────────────────────────────────────────── */
+
+.btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+:where([data-page="diet"]) .btn-row .btn-ghost {
+    flex: 1;
+    padding: 12px 0;
+}
+
+.hint {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 10px;
+}
+
+.save-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #cbd5e0;
+    cursor: pointer;
+}
+
+.save-row input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--red);
+    cursor: pointer;
+}
+
+#removeSaved {
+    margin-top: 8px;
+}
+
+#removeSaved[hidden] {
+    display: none;
+}
+
+/* weekly chart */
+.chart {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    height: 220px;
+    align-items: end;
+    position: relative;
+    padding-bottom: 46px;
+}
+
+.chart-col {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+}
+
+.chart-bar {
+    width: 100%;
+    max-width: 54px;
+    background: linear-gradient(180deg, var(--red), #b3261e);
+    border-radius: 6px 6px 0 0;
+    min-height: 3px;
+    transition: height 0.5s ease;
+}
+
+:where([data-page="diet"]) .chart-bar.over {
+    background: linear-gradient(180deg, #ecc94b, #b7791f);
+}
+
+:where([data-page="diet"]) .chart-col.selected .chart-bar {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.chart-val {
+    font-size: 12px;
+    color: #cbd5e0;
+}
+
+.chart-day {
+    position: absolute;
+    bottom: -42px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.3;
+}
+
+.goal-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 2px dashed rgba(72, 187, 120, 0.8);
+    pointer-events: none;
+}
+
+.goal-line span {
+    position: absolute;
+    right: 0;
+    top: -20px;
+    font-size: 12px;
+    color: var(--green);
+}
+
+/* plan modal */
+.plan-header {
+    background: linear-gradient(135deg, #f56565, #e53e3e);
+}
+
+.modal-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.modal-stat-box {
+    background: #f0f1f2;
+    padding: 14px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.modal-stat-label {
+    display: block;
+    font-size: 12px;
+    color: #718096;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modal-stat-value {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.modal-meals {
+    padding: 20px 24px 12px;
+}
+
+.modal-meals h5 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 14px;
+}
+
+.modal-meals ul {
+    list-style: none;
+}
+
+.modal-meals li {
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: #f7fafc;
+    border-radius: 6px;
+    font-size: 14.5px;
+    color: #4a5568;
+    border-left: 3px solid #f56565;
+}
+
+/* ── workouts + diet ─────────────────────────────────────────────────────── */
+
+:where([data-page="workouts"], [data-page="diet"]) .modal-actions {
+    padding: 8px 24px 26px;
+}
+
+/* ── workouts.html only ──────────────────────────────────────────────────── */
+
+@media (max-width: 992px) {
+    .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+/* ── workouts + diet ─────────────────────────────────────────────────────── */
+
+@media (max-width: 992px) {
+    :where([data-page="workouts"], [data-page="diet"]) .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+/* ── workouts.html only ──────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* ── diet.html only ──────────────────────────────────────────────────────── */
+
+@media (max-width: 992px) {
+    .summary {
+        grid-template-columns: 1fr;
+    }
+
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* ── workouts + diet ─────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+    :where([data-page="workouts"], [data-page="diet"]) .page-hero {
+        padding-top: 110px;
+    }
+
+}
+
+/* ── workouts.html only ──────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+    .ex-row {
+        flex-wrap: wrap;
+    }
+
+    .ex-detail {
+        width: 100%;
+        text-align: left;
+        padding-left: 38px;
+    }
+
+}
+
+/* ── diet.html only ──────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+    .chart {
+        gap: 4px;
+    }
+
+}
+
+/* ── admin.html only ─────────────────────────────────────────────────────── */
+
+.btn-mini {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e2e8f0;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-mini:hover {
+    border-color: var(--green);
+    color: #fff;
+}
+
+.btn-mini.danger:hover {
+    border-color: var(--red);
+    background: rgba(244, 67, 54, 0.15);
+}
+
+:where([data-page="admin"]) .field label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gray);
+}
+
+:where([data-page="admin"]) .field input,
+:where([data-page="admin"]) .field select,
+:where([data-page="admin"]) .field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    color: #1d1b26;
+    background: #f7fafc;
+}
+
+:where([data-page="admin"]) .field input:focus,
+:where([data-page="admin"]) .field select:focus,
+:where([data-page="admin"]) .field textarea:focus {
+    outline: none;
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.15);
+}
+
+:where([data-page="admin"]) .field textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+:where([data-page="admin"]) .field small {
+    font-size: 12px;
+    color: var(--gray);
+}
+
+:where([data-page="admin"]) .modal-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
+.btn-cancel {
+    background: #edf2f7;
+    border: none;
+    color: #1d1b26;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+.tab {
+    display: none;
+}
+
+:where([data-page="admin"]) .tab.active {
+    display: block;
+}
+
+/* tables */
+.table-wrap {
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    overflow-x: auto;
+}
+
+:where([data-page="admin"]) table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 640px;
+}
+
+:where([data-page="admin"]) th {
+    text-align: left;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+}
+
+:where([data-page="admin"]) td {
+    padding: 13px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 15px;
+    vertical-align: middle;
+}
+
+:where([data-page="admin"]) tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+:where([data-page="admin"]) td .sub {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+td.actions {
+    white-space: nowrap;
+    text-align: right;
+}
+
+td.actions .btn-mini {
+    margin-left: 6px;
+}
+
+:where([data-page="admin"]) .empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--muted);
+}
+
+.pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(72, 187, 120, 0.18);
+    color: var(--green);
+}
+
+:where([data-page="admin"]) .pill.off {
+    background: rgba(244, 67, 54, 0.18);
+    color: #ff8a80;
+}
+
+.pill.lvl {
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e0;
+}
+
+/* cards + charts */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+:where([data-page="admin"]) .panel {
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    padding: 22px;
+}
+
+:where([data-page="admin"]) .panel h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+:where([data-page="admin"]) .panel .note {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 18px;
+}
+
+.bar-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 44px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.bar-row .lbl {
+    color: #cbd5e0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bar-track {
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 999px;
+    height: 12px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--red), #ff7961);
+    transition: width 0.6s ease;
+}
+
+:where([data-page="admin"]) .bar-fill.green {
+    background: linear-gradient(90deg, var(--green-dark), var(--green));
+}
+
+.bar-row .val {
+    text-align: right;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+}
+
+.activity {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.activity li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(0, 0, 0, 0.18);
+    border-left: 4px solid var(--green);
+    border-radius: 8px;
+    padding: 11px 16px;
+    font-size: 15px;
+}
+
+:where([data-page="admin"]) .activity li.warn {
+    border-left-color: var(--yellow);
+}
+
+.activity li span {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    :where([data-page="admin"]) .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 767px) {
+    .modal-form {
+        grid-template-columns: 1fr;
+    }
+
+    .bar-row {
+        grid-template-columns: 90px 1fr 36px;
+    }
+
+}
+
+.auth p.error {
+    color: #ff5c5c;
+    font-size: 13px;
+    margin: -8px 0 12px;
+}
+
+.input-box.has-toggle input {
+    padding-right: 46px;
+}
+
+.input-box .toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    line-height: 0;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.55);
+    transition: color 0.2s;
+    z-index: 2;
+}
+
+.input-box .toggle-password:hover {
+    color: #fff;
+}
+
+.input-box .toggle-password svg {
+    display: block;
+}
+
+/* password hidden -> slashed eye */
+.input-box .toggle-password .icon-eye {
+    display: none;
+}
+
+/* password visible -> open eye */
+.input-box .toggle-password.showing .icon-eye {
+    display: block;
+}
+
+.input-box .toggle-password.showing .icon-eye-off {
+    display: none;
+}
+
+/* hide Edge's built-in eye so there aren't two */
+.input-box input[type="password"]::-ms-reveal {
+    display: none;
+}
+
+/* login: plain border when not focused */
+[data-page="login"] .input-box input:not(:focus) {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 20px;
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.nav-user span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   landing.blade.php only  (<html data-page="landing">)
+   Every rule below is scoped with :where([data-page="landing"]) so it cannot
+   affect the other pages (:where adds no specificity). Rules that were
+   identical to ones above were merged away. A few extra rules switch off
+   shared styles that would otherwise leak onto the landing markup
+   (.btn, .chip, .ring-text, .bar i).
+   ========================================================================== */
+
+:root:where([data-page="landing"]) {
+    --ink: #0b0f1a;
+    --panel: #141a2b;
+    --panel-2: #1b2339;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-strong: rgba(255, 255, 255, 0.16);
+    --text: #f1f3f9;
+    --muted: #98a2b8;
+    --red: #f44336;
+    --red-dark: #e53935;
+    --red-soft: #ff6f61;
+    --green: #4caf50;
+    --amber: #ffb74d;
+    --blue: #64b5f6;
+    --gutter: 32px;
+}
+
+:where([data-page="landing"]) * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html:where([data-page="landing"]) {
+    scroll-behavior: smooth;
+    scroll-padding-top: 88px;
+}
+
+:where([data-page="landing"]) body {
+    background: var(--ink);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+:where([data-page="landing"]) a {
+    color: inherit;
+    text-decoration: none;
+}
+
+:where([data-page="landing"]) :focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+:where([data-page="landing"]) svg {
+    display: block;
+}
+
+:where([data-page="landing"]) h1,
+:where([data-page="landing"]) h2,
+:where([data-page="landing"]) h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: 400;
+    letter-spacing: 1px;
+    line-height: 1;
+}
+
+:where([data-page="landing"]) .wrap {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+}
+
+:where([data-page="landing"]) .ico {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+:where([data-page="landing"]) .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 16px 6px 8px;
+    border-radius: 99px;
+    background: rgba(244, 67, 54, 0.12);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    color: #ff8a80;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+:where([data-page="landing"]) .eyebrow i {
+    width: 8px;
+    height: 8px;
+    margin-left: 6px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 0 4px rgba(244, 67, 54, 0.25);
+}
+
+/* buttons */
+:where([data-page="landing"]) .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 54px;
+    padding: 0 32px;
+    border-radius: 12px;
+    background: var(--red);
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    box-shadow: 0 8px 28px rgba(244, 67, 54, 0.38);
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    width: auto;
+    font-family: inherit;
+    letter-spacing: normal;
+    overflow: visible;
+    position: static;
+}
+
+:where([data-page="landing"]) .btn:hover {
+    background: var(--red-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 34px rgba(244, 67, 54, 0.5);
+}
+
+:where([data-page="landing"]) .btn::before {
+    content: none;
+}
+
+:where([data-page="landing"]) .btn:focus-visible {
+    outline-offset: 3px;
+}
+
+:where([data-page="landing"]) .btn .ico {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s;
+}
+
+:where([data-page="landing"]) .btn:hover .ico {
+    transform: translateX(3px);
+}
+
+:where([data-page="landing"]) .btn.ghost {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--line-strong);
+    box-shadow: none;
+    backdrop-filter: blur(6px);
+}
+
+:where([data-page="landing"]) .btn.ghost:hover {
+    background: rgba(255, 255, 255, 0.11);
+    box-shadow: none;
+}
+
+:where([data-page="landing"]) .btn.small {
+    height: 42px;
+    padding: 0 22px;
+    font-size: 14px;
+    border-radius: 10px;
+    box-shadow: none;
+}
+
+:where([data-page="landing"]) .btn.small:hover {
+    box-shadow: 0 8px 22px rgba(244, 67, 54, 0.4);
+}
+
+/* header: full width, logo flush left / actions flush right, like the dashboard */
+/* NAVBAR: same rules as the app's style.css */
+:where([data-page="landing"]) .navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgba(26, 32, 44, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    font-family: 'Barlow', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+:where([data-page="landing"]) .nav-link {
+    color: #ffffff;
+    text-decoration: none;
+    position: relative;
+}
+
+:where([data-page="landing"]) .btn-logout:hover {
+    background-color: var(--red);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(245, 101, 101, 0.4);
+}
+
+/* Sign in: same ghost look as the Sign in button in the hero */
+:where([data-page="landing"]) .btn-signin {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    border: 1px solid var(--line-strong);
+    padding: 10px 25px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: all 0.3s ease;
+}
+
+:where([data-page="landing"]) .btn-signin:hover {
+    background: rgba(255, 255, 255, 0.11);
+    transform: translateY(-3px);
+}
+
+/* hero */
+:where([data-page="landing"]) .hero {
+    position: relative;
+    padding: 170px 0 120px;
+    overflow: hidden;
+    background:
+        radial-gradient(60% 70% at 85% 30%, rgba(244, 67, 54, 0.16) 0%, transparent 60%),
+        linear-gradient(90deg, rgba(11, 15, 26, 0.98) 0%, rgba(11, 15, 26, 0.86) 50%, rgba(11, 15, 26, 0.6) 100%),
+        linear-gradient(0deg, var(--ink) 0%, transparent 25%),
+        url(../images/battle-rope.jpg) center / cover no-repeat var(--ink);
+}
+
+:where([data-page="landing"]) .hero .wrap {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 72px;
+    align-items: center;
+}
+
+:where([data-page="landing"]) .hero h1 {
+    margin-top: 26px;
+    font-size: clamp(56px, 7.4vw, 100px);
+    letter-spacing: 1.5px;
+}
+
+:where([data-page="landing"]) .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, #ff6f61, var(--red));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+:where([data-page="landing"]) .hero .lead {
+    margin: 26px 0 38px;
+    max-width: 48ch;
+    font-size: 19px;
+    color: #c3cadb;
+}
+
+:where([data-page="landing"]) .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+:where([data-page="landing"]) .perks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 30px;
+    margin-top: 48px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+    list-style: none;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+:where([data-page="landing"]) .perks li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+:where([data-page="landing"]) .perks .ico {
+    width: 18px;
+    height: 18px;
+    color: var(--red);
+}
+
+/* hero visual */
+:where([data-page="landing"]) .visual {
+    position: relative;
+}
+
+:where([data-page="landing"]) .visual::before {
+    content: '';
+    position: absolute;
+    inset: -40px;
+    background: radial-gradient(closest-side, rgba(244, 67, 54, 0.22), transparent);
+    filter: blur(20px);
+    z-index: 0;
+}
+
+:where([data-page="landing"]) .today {
+    position: relative;
+    z-index: 1;
+    background: rgba(20, 26, 43, 0.78);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 26px;
+    padding: 32px;
+    box-shadow: 0 40px 90px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+:where([data-page="landing"]) .float {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px 12px 12px;
+    border-radius: 16px;
+    background: rgba(27, 35, 57, 0.92);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+    font-size: 13px;
+    line-height: 1.3;
+    animation: bob 5s ease-in-out infinite;
+}
+
+:where([data-page="landing"]) .float b {
+    display: block;
+    font-size: 15px;
+}
+
+:where([data-page="landing"]) .float span {
+    color: var(--muted);
+}
+
+:where([data-page="landing"]) .float .dot {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+:where([data-page="landing"]) .float .dot .ico {
+    width: 18px;
+    height: 18px;
+}
+
+:where([data-page="landing"]) .float.a {
+    top: -26px;
+    left: -34px;
+}
+
+:where([data-page="landing"]) .float.a .dot {
+    background: rgba(76, 175, 80, 0.18);
+    color: var(--green);
+}
+
+:where([data-page="landing"]) .float.b {
+    bottom: -28px;
+    right: -18px;
+    animation-delay: -2.4s;
+}
+
+:where([data-page="landing"]) .float.b .dot {
+    background: rgba(244, 67, 54, 0.18);
+    color: var(--red-soft);
+}
+
+@keyframes bob {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+:where([data-page="landing"]) .today-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 26px;
+}
+
+:where([data-page="landing"]) .today-head h3 {
+    font-size: 28px;
+}
+
+:where([data-page="landing"]) .tag {
+    font-size: 12px;
+    padding: 3px 12px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--muted);
+}
+
+:where([data-page="landing"]) .ring-row {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+}
+
+:where([data-page="landing"]) .ring {
+    position: relative;
+    width: 136px;
+    height: 136px;
+    flex-shrink: 0;
+}
+
+:where([data-page="landing"]) .ring svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+:where([data-page="landing"]) .ring circle {
+    fill: none;
+    stroke-width: 11;
+}
+
+:where([data-page="landing"]) .ring .track {
+    stroke: rgba(255, 255, 255, 0.09);
+}
+
+:where([data-page="landing"]) .ring .fill {
+    stroke: var(--red);
+    stroke-linecap: round;
+    stroke-dasharray: 326.7;
+    stroke-dashoffset: 81.7;
+    animation: draw 1.4s 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes draw {
+    from {
+        stroke-dashoffset: 326.7;
+    }
+}
+
+:where([data-page="landing"]) .ring b {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: 400;
+    font-size: 38px;
+    letter-spacing: 1px;
+    line-height: 1;
+}
+
+:where([data-page="landing"]) .ring b small {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0;
+    margin-top: 4px;
+}
+
+:where([data-page="landing"]) .ring-text {
+    position: static;
+    inset: auto;
+    display: block;
+    flex-direction: row;
+    align-items: normal;
+    justify-content: normal;
+    text-align: inherit;
+}
+
+:where([data-page="landing"]) .ring-text strong {
+    display: block;
+    font-size: 18px;
+}
+
+:where([data-page="landing"]) .ring-text span {
+    font-size: 14px;
+    color: var(--muted);
+}
+
+:where([data-page="landing"]) .bar {
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.09);
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+:where([data-page="landing"]) .bar i {
+    display: block;
+    height: 100%;
+    width: var(--w);
+    border-radius: inherit;
+    background: var(--c, var(--red));
+    animation: fill 1.1s 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    transition: none;
+}
+
+@keyframes fill {
+    from {
+        width: 0;
+    }
+}
+
+:where([data-page="landing"]) .macro {
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+:where([data-page="landing"]) .macro div:first-child {
+    display: flex;
+    justify-content: space-between;
+}
+
+:where([data-page="landing"]) .macro span {
+    color: var(--muted);
+}
+
+:where([data-page="landing"]) .today-foot {
+    display: flex;
+    gap: 14px;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+}
+
+:where([data-page="landing"]) .today-foot div {
+    flex: 1;
+}
+
+:where([data-page="landing"]) .today-foot b {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: 400;
+    font-size: 36px;
+    letter-spacing: 1px;
+    line-height: 1.1;
+}
+
+:where([data-page="landing"]) .today-foot span {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* sections */
+:where([data-page="landing"]) section.block {
+    padding: 110px 0;
+}
+
+:where([data-page="landing"]) .head {
+    max-width: 640px;
+    margin-bottom: 56px;
+}
+
+:where([data-page="landing"]) .head .kicker {
+    display: block;
+    margin-bottom: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2.4px;
+    text-transform: uppercase;
+    color: var(--red-soft);
+}
+
+:where([data-page="landing"]) .head h2 {
+    font-size: clamp(42px, 5.4vw, 66px);
+}
+
+:where([data-page="landing"]) .head p {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 18px;
+}
+
+/* features */
+:where([data-page="landing"]) .features {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 22px;
+}
+
+:where([data-page="landing"]) .panel {
+    position: relative;
+    background: linear-gradient(180deg, var(--panel-2) 0%, var(--panel) 100%);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 36px;
+    transition: border-color 0.25s, transform 0.25s;
+}
+
+:where([data-page="landing"]) .panel:hover {
+    border-color: rgba(244, 67, 54, 0.35);
+    transform: translateY(-4px);
+}
+
+:where([data-page="landing"]) .panel.tall {
+    grid-row: span 2;
+}
+
+:where([data-page="landing"]) .tile {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border-radius: 15px;
+    background: rgba(244, 67, 54, 0.14);
+    border: 1px solid rgba(244, 67, 54, 0.22);
+    color: #ff6f61;
+    margin-bottom: 24px;
+}
+
+:where([data-page="landing"]) .panel h3 {
+    font-size: 36px;
+    margin-bottom: 12px;
+}
+
+:where([data-page="landing"]) .panel>p {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 46ch;
+}
+
+:where([data-page="landing"]) .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 26px 0 8px;
+}
+
+:where([data-page="landing"]) .chip {
+    padding: 5px 14px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.07);
+    font-size: 13px;
+    color: var(--muted);
+    border: none;
+    cursor: auto;
+    font-weight: inherit;
+    transition: none;
+}
+
+:where([data-page="landing"]) .chip:hover {
+    color: var(--muted);
+}
+
+:where([data-page="landing"]) .chip.red {
+    background: rgba(244, 67, 54, 0.16);
+    color: #ff8a80;
+}
+
+:where([data-page="landing"]) .exercises {
+    list-style: none;
+    margin-top: 12px;
+}
+
+:where([data-page="landing"]) .exercises li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 16px;
+}
+
+:where([data-page="landing"]) .exercises li:last-child {
+    border-bottom: 0;
+}
+
+:where([data-page="landing"]) .exercises .ok {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+:where([data-page="landing"]) .exercises .done .ok {
+    background: var(--green);
+    border-color: var(--green);
+}
+
+:where([data-page="landing"]) .exercises .ok svg {
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 3.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+}
+
+:where([data-page="landing"]) .exercises .done .ok svg {
+    opacity: 1;
+}
+
+:where([data-page="landing"]) .exercises .done {
+    color: var(--muted);
+}
+
+:where([data-page="landing"]) .exercises em {
+    margin-left: auto;
+    font-style: normal;
+    font-size: 14px;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+:where([data-page="landing"]) .week {
+    display: flex;
+    gap: 10px;
+    margin-top: 28px;
+}
+
+:where([data-page="landing"]) .week span {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+:where([data-page="landing"]) .week span::before {
+    content: '';
+    display: block;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.07);
+    margin-bottom: 8px;
+}
+
+:where([data-page="landing"]) .week .on::before {
+    background: var(--red);
+    box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+}
+
+/* highlights strip */
+:where([data-page="landing"]) .strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: 22px;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: linear-gradient(180deg, var(--panel-2) 0%, var(--panel) 100%);
+    overflow: hidden;
+}
+
+:where([data-page="landing"]) .strip div {
+    padding: 30px 28px;
+    border-right: 1px solid var(--line);
+}
+
+:where([data-page="landing"]) .strip div:last-child {
+    border-right: 0;
+}
+
+:where([data-page="landing"]) .strip .ico {
+    color: var(--red-soft);
+    margin-bottom: 14px;
+}
+
+:where([data-page="landing"]) .strip b {
+    display: block;
+    font-size: 17px;
+    margin-bottom: 4px;
+}
+
+:where([data-page="landing"]) .strip span {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+    display: block;
+}
+
+/* steps */
+:where([data-page="landing"]) .how {
+    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.02) 50%, transparent);
+}
+
+:where([data-page="landing"]) .steps {
+    list-style: none;
+    counter-reset: s;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    position: relative;
+}
+
+:where([data-page="landing"]) .steps::before {
+    content: '';
+    position: absolute;
+    top: 27px;
+    left: 54px;
+    right: 54px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--line-strong) 0 8px, transparent 8px 16px);
+}
+
+:where([data-page="landing"]) .steps li {
+    counter-increment: s;
+    position: relative;
+    padding: 0 8px 0 0;
+}
+
+:where([data-page="landing"]) .steps li::before {
+    content: counter(s);
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--red);
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 0 0 8px var(--ink), 0 10px 24px rgba(244, 67, 54, 0.4);
+}
+
+:where([data-page="landing"]) .steps h3 {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+:where([data-page="landing"]) .steps p {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 34ch;
+}
+
+/* cta */
+:where([data-page="landing"]) .cta {
+    padding: 20px 0 120px;
+}
+
+:where([data-page="landing"]) .cta .box {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(120deg, #ff5448 0%, var(--red) 45%, #d32f2f 100%);
+    border-radius: 30px;
+    padding: 72px 68px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 36px;
+    box-shadow: 0 40px 90px rgba(244, 67, 54, 0.25);
+}
+
+:where([data-page="landing"]) .cta .box::before {
+    content: '';
+    position: absolute;
+    left: -120px;
+    bottom: -160px;
+    width: 360px;
+    height: 360px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+:where([data-page="landing"]) .cta .box::after {
+    content: '';
+    position: absolute;
+    right: -90px;
+    top: -90px;
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    border: 50px solid rgba(255, 255, 255, 0.09);
+}
+
+:where([data-page="landing"]) .cta .box>* {
+    position: relative;
+    z-index: 1;
+}
+
+:where([data-page="landing"]) .cta h2 {
+    font-size: clamp(42px, 5.4vw, 68px);
+    max-width: 13ch;
+}
+
+:where([data-page="landing"]) .cta p {
+    margin-top: 14px;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+:where([data-page="landing"]) .cta .btn {
+    background: #fff;
+    color: var(--red-dark);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+    flex-shrink: 0;
+}
+
+:where([data-page="landing"]) .cta .btn:hover {
+    background: #fff;
+}
+
+/* footer */
+/* FOOTER: same rules as the app's style.css */
+:where([data-page="landing"]) .footer {
+    --muted: #a0aec0;
+    background: #282535;
+    color: white;
+    padding: 48px 0 16px;
+    font-family: 'Barlow', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+:where([data-page="landing"]) .footer .container {
+    width: 100%;
+    max-width: 1400px;
+    margin: auto;
+    padding: 0 30px;
+}
+
+:where([data-page="landing"]) .footer-brand h3 {
+    font-family: inherit;
+    font-weight: bold;
+    letter-spacing: normal;
+    line-height: 1.6;
+    font-size: 28.8px;
+    margin-bottom: 8px;
+}
+
+:where([data-page="landing"]) .footer-column h4 {
+    font-family: inherit;
+    font-size: 19.2px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: var(--red);
+}
+
+@media (max-width: 767px) {}
+
+@media (max-width: 1100px) {
+    :where([data-page="landing"]) .float.a {
+        left: -10px;
+    }
+
+    :where([data-page="landing"]) .float.b {
+        right: -6px;
+    }
+}
+
+@media (max-width: 960px) {
+    :root:where([data-page="landing"]) {
+        --gutter: 24px;
+    }
+
+    :where([data-page="landing"]) .hero {
+        padding: 130px 0 90px;
+    }
+
+    :where([data-page="landing"]) .hero .wrap,
+    :where([data-page="landing"]) .features {
+        grid-template-columns: 1fr;
+        gap: 48px;
+    }
+
+    :where([data-page="landing"]) .features {
+        gap: 22px;
+    }
+
+    :where([data-page="landing"]) .panel.tall {
+        grid-row: auto;
+    }
+
+    :where([data-page="landing"]) .strip {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    :where([data-page="landing"]) .strip div:nth-child(2) {
+        border-right: 0;
+    }
+
+    :where([data-page="landing"]) .strip div:nth-child(-n+2) {
+        border-bottom: 1px solid var(--line);
+    }
+
+    :where([data-page="landing"]) .steps {
+        grid-template-columns: 1fr;
+    }
+
+    :where([data-page="landing"]) .steps::before {
+        display: none;
+    }
+
+    :where([data-page="landing"]) .cta .box {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 48px 30px;
+    }
+
+    :where([data-page="landing"]) section.block {
+        padding: 76px 0;
+    }
+
+}
+
+@media (max-width: 640px) {
+    :root:where([data-page="landing"]) {
+        --gutter: 18px;
+    }
+
+    :where([data-page="landing"]) .float {
+        display: none;
+    }
+
+    :where([data-page="landing"]) .today {
+        padding: 22px;
+    }
+
+    :where([data-page="landing"]) .ring-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    :where([data-page="landing"]) .strip {
+        grid-template-columns: 1fr;
+    }
+
+    :where([data-page="landing"]) .strip div {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    :where([data-page="landing"]) .strip div:last-child {
+        border-bottom: 0;
+    }
+
+    :where([data-page="landing"]) .panel {
+        padding: 26px;
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html:where([data-page="landing"]) {
+        scroll-behavior: auto;
+    }
+
+    :where([data-page="landing"]) .ring .fill,
+    :where([data-page="landing"]) .bar i,
+    :where([data-page="landing"]) .float {
+        animation: none;
+    }
+
+    :where([data-page="landing"]) .btn,
+    :where([data-page="landing"]) .panel {
+        transition: none;
+    }
+}
