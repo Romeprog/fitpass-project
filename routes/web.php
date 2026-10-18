@@ -17,7 +17,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
-// Only for logged-in users
+// Only for logged-in members
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -27,12 +27,14 @@ Route::middleware('auth')->group(function () {
     Route::view('/about', 'about')->name('about');
 });
 
-// Admin area: its own login and its own "admin" guard, separate from member accounts
+// Admin area
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
     Route::post('/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
-    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-});
 
-// Only for a signed-in admin (uses the admin guard, not the member login)
-Route::view('/admin', 'admin')->middleware('admin')->name('admin');
+    // Uses your teammate's AdminMiddleware (alias "admin")
+    Route::middleware('admin')->group(function () {
+        Route::view('/', 'admin')->name('admin');
+        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+    });
+});
