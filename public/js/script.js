@@ -93,43 +93,60 @@ function initNav() {
     }
 }
 
-/* ── Page: home ── */
-/* home.html */
-function initHome() {
-    let toastTimer;
-    function toast(msg, isError) {
-        let t = document.getElementById('toast');
-        if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
-        t.textContent = msg;
-        t.classList.toggle('error', !!isError);
-        t.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+/* ── Shared: talking to Laravel ──
+   Uses the login session plus the CSRF token from the page (<meta name="csrf-token">).
+   Returns the JSON answer, or throws an Error with a readable message. */
+async function apiRequest(method, url, body) {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    const headers = { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
+    if (meta) headers['X-CSRF-TOKEN'] = meta.content;
+    if (body !== undefined) headers['Content-Type'] = 'application/json';
+
+    const res = await fetch(url, {
+        method,
+        headers,
+        credentials: 'same-origin',
+        body: body !== undefined ? JSON.stringify(body) : undefined
+    });
+
+    if (res.status === 401 || res.status === 419) {
+        location.replace('/login');
+        throw new Error('Please log in again.');
     }
+    if (!res.ok) {
+        let msg = 'Something went wrong (' + res.status + ').';
+        try {
+            const j = await res.json();
+            if (j.errors) msg = Object.values(j.errors)[0][0];
+            else if (j.message) msg = j.message;
+        } catch (e) { }
+        throw new Error(msg);
+    }
+    return res.json();
+}
 
+/* ── Page: home ── */
+/* home.html
+   The "Today at a glance" cards now come from the database (GET /api/home). */
+function initHome() {
+    const set = (id, v) => { document.getElementById(id).textContent = v; };
 
-    (function () {
-        const d = FP.data();
-        const today = FP.today();
-        const t = FP.totals(d.foods[today] || []);
-        const set = (id, v) => { document.getElementById(id).textContent = v; };
-
-        set('gCal', Math.round(t.cal));
+    apiRequest('GET', '/api/home?date=' + FP.today()).then(d => {
+        set('gCal', Math.round(d.today.cal));
         set('gCalGoal', d.goals.cal);
-        set('gPro', Math.round(t.p));
+        set('gPro', Math.round(d.today.p));
         set('gProGoal', d.goals.p);
-        const meals = (d.foods[today] || []).length;
-        set('gMeals', meals);
+        set('gMeals', d.today.meals);
         set('gWeek', FP.weekCount(d.workouts));
 
-        const left = d.goals.cal - Math.round(t.cal);
-        if (t.cal > 0) set('gCalNote', left >= 0 ? left + ' kcal left today' : Math.abs(left) + ' kcal over goal');
+        const left = d.goals.cal - Math.round(d.today.cal);
+        if (d.today.cal > 0) set('gCalNote', left >= 0 ? left + ' kcal left today' : Math.abs(left) + ' kcal over goal');
         const st = FP.streak(d.workouts);
         if (st > 0) set('gStreak', st + '-day streak. Keep it going!');
-        if (meals > 0) set('gMealsNote', meals === 1 ? 'Nice start. Keep logging!' : 'Great job tracking today');
-    })();
-
-
+        if (d.today.meals > 0) set('gMealsNote', d.today.meals === 1 ? 'Nice start. Keep logging!' : 'Great job tracking today');
+    }).catch(() => {
+        // If the numbers can not load, the cards keep their default text (0 and the starter notes).
+    });
 }
 
 /* ── Page: workouts ── */
@@ -146,145 +163,51 @@ function initWorkouts() {
         toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
     }
 
+    /* ── Talking to Laravel (login session + CSRF token from layouts/app.blade.php) ── */
+    function csrfToken() {
+        const m = document.querySelector('meta[name="csrf-token"]');
+        return m ? m.content : '';
+    }
 
-    const workoutPlans = {
-        arm: {
-            title: 'Arm Workout', cat: 'strength', level: 'Intermediate', minutes: 25,
-            desc: 'Build strength and definition in your biceps, triceps, and forearms.',
-            exercises: [
-                { name: 'Diamond Push Up', detail: '10 Reps • 3 Sets' },
-                { name: 'Push Up', detail: '10 Reps • 3 Sets' },
-                { name: 'Push Up & Rotation', detail: '12 Reps • 2 Sets' },
-                { name: 'Burpees', detail: '16 Reps • 2 Sets' },
-                { name: 'Tricep Dips', detail: '12 Reps • 3 Sets' },
-                { name: 'Triceps Push Up', detail: '14 Reps • 2 Sets' },
-                { name: 'Plank Shoulder Taps', detail: '12 Reps • 3 Sets' }
-            ]
-        },
-        chest: {
-            title: 'Chest Workout', cat: 'strength', level: 'Intermediate', minutes: 25,
-            desc: 'Strengthen and sculpt your pectoral muscles with targeted push variations.',
-            exercises: [
-                { name: 'Push Up', detail: '10 Reps • 3 Sets' },
-                { name: 'Wide Push Up', detail: '12 Reps • 2 Sets' },
-                { name: 'Diamond Push Up', detail: '12 Reps • 3 Sets' },
-                { name: 'Decline Push Up', detail: '10 Reps • 2 Sets' },
-                { name: 'Incline Push Up', detail: '10 Reps • 2 Sets' },
-                { name: 'Archer Push Up', detail: '10 Reps • 2 Sets' },
-                { name: 'Bench Press', detail: '10 Reps • 2 Sets' }
-            ]
-        },
-        leg: {
-            title: 'Leg Workout', cat: 'strength', level: 'Intermediate', minutes: 30,
-            desc: 'Power up your quads, hamstrings, and glutes with lower body exercises.',
-            exercises: [
-                { name: 'Squat', detail: '12 Reps • 2 Sets' },
-                { name: 'Reverse Lunges', detail: '12 Reps • 3 Sets' },
-                { name: 'Step Up', detail: '15 Reps • 3 Sets' },
-                { name: 'Curtsy Lunges', detail: '14 Reps • 2 Sets' },
-                { name: 'Lunges', detail: '10 Reps • 2 Sets' },
-                { name: 'Bulgarian Split Squat', detail: '10 Reps • 3 Sets' },
-                { name: 'Jump Squats', detail: '14 Reps • 2 Sets' }
-            ]
-        },
-        shoulder: {
-            title: 'Shoulder Workout', cat: 'strength', level: 'Intermediate', minutes: 25,
-            desc: 'Develop strong, defined shoulders with focused deltoid exercises.',
-            exercises: [
-                { name: 'Lateral Raise', detail: '10 Reps • 3 Sets' },
-                { name: 'Pike Push Up', detail: '12 Reps • 3 Sets' },
-                { name: 'Decline Push Up', detail: '10 Reps • 3 Sets' },
-                { name: 'Incline Push Up', detail: '10 Reps • 3 Sets' },
-                { name: 'Plank To Downward Dog', detail: '12 Reps • 3 Sets' },
-                { name: 'Shoulder Taps', detail: '20 Reps • 3 Sets' },
-                { name: 'Tricep Dips', detail: '12 Reps • 3 Sets' }
-            ]
-        },
-        abs: {
-            title: 'Abs Workout', cat: 'core', level: 'Beginner', minutes: 20,
-            desc: 'Tone and tighten your core with effective abdominal exercises.',
-            exercises: [
-                { name: 'Sit Up', detail: '13 Reps • 3 Sets' },
-                { name: 'Leg Raise', detail: '12 Reps • 3 Sets' },
-                { name: 'Plank', detail: '2:00 minutes • 2 Sets' },
-                { name: 'Russian Twist', detail: '10 Reps • 3 Sets' },
-                { name: 'Bicycle Crunches', detail: '14 Reps • 2 Sets' },
-                { name: 'Heel Touch', detail: '20 Reps • 3 Sets' },
-                { name: 'V-Up', detail: '16 Reps • 2 Sets' }
-            ]
-        },
-        back: {
-            title: 'Back Workout', cat: 'strength', level: 'Advanced', minutes: 30,
-            desc: 'Build a wider, stronger back with pull-focused and posterior chain movements.',
-            exercises: [
-                { name: 'Pull Ups', detail: '12 Reps • 3 Sets' },
-                { name: 'Australian Pull-Ups', detail: '14 Reps • 2 Sets' },
-                { name: 'Reverse Snow Angels', detail: '15 Reps • 3 Sets' },
-                { name: 'Back Widow', detail: '12 Reps • 3 Sets' },
-                { name: 'Scapula Push Up', detail: '10 Reps • 2 Sets' },
-                { name: 'Superman Hold', detail: '50 seconds • 2 Sets' },
-                { name: 'Resistance Band Deadlift', detail: '10 Reps • 3 Sets' }
-            ]
-        },
-        cardio: {
-            title: 'Cardio Workout', cat: 'cardio', level: 'Beginner', minutes: 25,
-            desc: 'Boost your heart rate and burn calories with energetic cardio exercises.',
-            exercises: [
-                { name: 'Jumping Jacks', detail: '45 seconds • 3 Sets' },
-                { name: 'High Knees', detail: '40 seconds • 3 Sets' },
-                { name: 'Jump Rope', detail: '60 seconds • 3 Sets' },
-                { name: 'Butt Kicks', detail: '40 seconds • 3 Sets' },
-                { name: 'Mountain Climbers', detail: '30 seconds • 3 Sets' },
-                { name: 'Box Step-Ups', detail: '15 Reps • 3 Sets' },
-                { name: 'Running in Place', detail: '60 seconds • 2 Sets' }
-            ]
-        },
-        fullbody: {
-            title: 'Full Body Workout', cat: 'full', level: 'Intermediate', minutes: 35,
-            desc: 'Hit every muscle group with a complete full-body training session.',
-            exercises: [
-                { name: 'Burpees', detail: '12 Reps • 3 Sets' },
-                { name: 'Squat to Press', detail: '12 Reps • 3 Sets' },
-                { name: 'Push Up to Row', detail: '10 Reps • 3 Sets' },
-                { name: 'Reverse Lunge with Twist', detail: '12 Reps • 2 Sets' },
-                { name: 'Plank Up-Down', detail: '10 Reps • 3 Sets' },
-                { name: 'Glute Bridge', detail: '15 Reps • 3 Sets' },
-                { name: 'Dead Bug', detail: '10 Reps • 2 Sets' }
-            ]
-        },
-        hiit: {
-            title: 'HIIT Workout', cat: 'cardio', level: 'Advanced', minutes: 20,
-            desc: 'Max-intensity intervals to torch fat and skyrocket your metabolism.',
-            exercises: [
-                { name: 'Burpees', detail: '20s on • 10s rest • 4 Sets' },
-                { name: 'Jump Squats', detail: '20s on • 10s rest • 4 Sets' },
-                { name: 'Explosive Push Ups', detail: '20s on • 10s rest • 3 Sets' },
-                { name: 'Sprint in Place', detail: '20s on • 10s rest • 4 Sets' },
-                { name: 'Plank to Push Up', detail: '20s on • 10s rest • 3 Sets' },
-                { name: 'Lateral Bounds', detail: '20s on • 10s rest • 3 Sets' },
-                { name: 'Tuck Jumps', detail: '20s on • 10s rest • 4 Sets' }
-            ]
-        }
-    };
+    async function api(method, url, body) {
+        const headers = { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken(), 'X-Requested-With': 'XMLHttpRequest' };
+        if (body) headers['Content-Type'] = 'application/json';
+        const res = await fetch(url, { method, credentials: 'same-origin', headers, body: body ? JSON.stringify(body) : undefined });
+        if (res.status === 401 || res.status === 419) { location.replace('/login'); throw new Error('Please log in again.'); }
+        if (!res.ok) throw new Error('Request failed (' + res.status + ')');
+        return res.json();
+    }
 
     const categories = [
         { id: 'all', label: 'All' }, { id: 'strength', label: 'Strength' }, { id: 'core', label: 'Core' },
         { id: 'cardio', label: 'Cardio & HIIT' }, { id: 'full', label: 'Full Body' }
     ];
 
-    let data = FP.data();
+    let workoutPlans = {};   // loaded from the database: { slug: { title, cat, level, minutes, desc, exercises: [{ name, detail }] } }
+    let sessions = [];       // this member's saved workouts: { id, plan, title, status, done, total, minutes, date, ts, checks }
     let activeCat = 'all';
-    let current = null;      // { id, checks: [] }
+    let current = null;      // { id: workout slug, checks: [], sessionId }
+    let saveChain = Promise.resolve();   // saves run one after another so a quick double tick can't create two sessions
 
     const $ = id => document.getElementById(id);
 
     /* ── stats + cards + history ── */
+    // only fully finished workouts count here; partly done ones show in history as "Partially Completed"
+    const finished = () => sessions.filter(w => w.status === 'completed');
+
+    // the member's unfinished session for a workout (only if their latest one for it is still in progress)
+    function unfinishedFor(id) {
+        const latest = sessions.filter(s => s.plan === id).sort((a, b) => b.ts - a.ts)[0];
+        return latest && latest.status === 'in_progress' ? latest : null;
+    }
+
     function renderStats() {
         const today = FP.today();
-        $('sWeek').textContent = FP.weekCount(data.workouts);
-        $('sTotal').textContent = data.workouts.length;
-        $('sStreak').textContent = FP.streak(data.workouts);
-        $('sToday').textContent = data.workouts.filter(w => w.date === today).length;
+        const list = finished();
+        $('sWeek').textContent = FP.weekCount(list);
+        $('sTotal').textContent = list.length;
+        $('sStreak').textContent = FP.streak(list);
+        $('sToday').textContent = list.filter(w => w.date === today).length;
     }
 
     function renderFilters() {
@@ -295,40 +218,72 @@ function initWorkouts() {
 
     function renderCards() {
         const today = FP.today();
-        const doneToday = new Set(data.workouts.filter(w => w.date === today).map(w => w.plan));
+        const doneToday = new Set(finished().filter(w => w.date === today).map(w => w.plan));
         $('workoutGrid').innerHTML = Object.entries(workoutPlans)
             .filter(([, p]) => activeCat === 'all' || p.cat === activeCat)
-            .map(([id, p]) => `
-                <article class="w-card" id="card-${id}">
+            .map(([id, p]) => {
+                const open = unfinishedFor(id);
+                const badge = open ? 'In progress · ' + open.done + '/' + open.total : (doneToday.has(id) ? '✓ Done today' : FP.esc(p.level));
+                const button = open
+                    ? `<button class="btn-green" type="button" data-resume="${open.id}">Continue Workout</button>`
+                    : `<button class="btn-green" type="button" data-start="${FP.esc(id)}">Start Workout</button>`;
+                return `
+                <article class="w-card" id="card-${FP.esc(id)}">
                     <div class="w-head">
-                        <h3>${p.title}</h3>
-                        <span class="badge">${doneToday.has(id) ? '✓ Done today' : p.level}</span>
+                        <h3>${FP.esc(p.title)}</h3>
+                        <span class="badge">${badge}</span>
                     </div>
                     <div class="w-body">
-                        <p class="w-desc">${p.desc}</p>
+                        <p class="w-desc">${FP.esc(p.desc)}</p>
                         <div class="w-meta"><span>🏋️ ${p.exercises.length} exercises</span><span>⏱ ~${p.minutes} min</span></div>
-                        <button class="btn-green" type="button" data-start="${id}">Start Workout</button>
+                        ${button}
                     </div>
-                </article>`).join('');
+                </article>`;
+            }).join('');
     }
 
     function renderHistory() {
-        const list = [...data.workouts].sort((a, b) => b.ts - a.ts).slice(0, 30);
+        const list = [...sessions].sort((a, b) => b.ts - a.ts).slice(0, 30);
         $('historyEmpty').style.display = list.length ? 'none' : 'block';
         $('clearHistory').style.display = list.length ? '' : 'none';
         $('historyList').innerHTML = list.map(w => {
-            const full = w.done === w.total;
+            const full = w.status === 'completed';
             const when = FP.parse(w.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
             return `<li class="history-item${full ? '' : ' partial'}">
                 <div class="history-main"><b>${FP.esc(w.title)}</b><span>${when} · ${full ? 'Completed' : 'Partially Completed'}</span></div>
                 <div class="history-score">${w.done}/${w.total}</div>
-                ${full || !workoutPlans[w.plan] ? '' : `<button class="btn-continue" type="button" data-continue="${w.ts}">Continue</button>`}
-                <button class="icon-btn" type="button" data-del="${w.ts}" aria-label="Delete this entry">🗑</button>
+                ${full || !workoutPlans[w.plan] ? '' : `<button class="btn-continue" type="button" data-continue="${w.id}">Continue</button>`}
+                <button class="icon-btn" type="button" data-del="${w.id}" aria-label="Delete this entry">🗑</button>
             </li>`;
         }).join('');
     }
 
     function renderAll() { renderStats(); renderCards(); renderHistory(); }
+
+    /* ── Saving ──
+       Every tick is saved to the database straight away (status "in_progress").
+       When every exercise is ticked the server marks the session "completed". */
+    function saveProgress(sess) {
+        const checks = sess.checks.slice();
+        const task = async () => {
+            try {
+                const res = await api('POST', '/api/workout-sessions', {
+                    session_id: sess.sessionId, workout: sess.id, checks, date: FP.today()
+                });
+                sessions = sessions.filter(s => s.id !== sess.sessionId);
+                if (res.session) { sess.sessionId = res.session.id; sessions.push(res.session); }
+                else { sess.sessionId = null; }
+                renderAll();
+                return true;
+            } catch (e) {
+                toast('Could not save your progress. Check your connection.', true);
+                return false;
+            }
+        };
+        const p = saveChain.then(task);
+        saveChain = p;
+        return p;
+    }
 
     /* ── Modal ── */
     function renderSession() {
@@ -339,9 +294,9 @@ function initWorkouts() {
             <li class="ex-item">
                 <button type="button" class="ex-row${current.checks[i] ? ' done' : ''}" data-ex="${i}" aria-pressed="${!!current.checks[i]}">
                     <span class="check">${current.checks[i] ? '✓' : ''}</span>
-                    <span class="ex-name">${e.name}</span><span class="ex-detail">${e.detail}</span>
+                    <span class="ex-name">${FP.esc(e.name)}</span><span class="ex-detail">${FP.esc(e.detail)}</span>
                 </button>
-                <button type="button" class="ex-help" data-demo="${i}" aria-label="How to do ${e.name}" title="How to do this exercise">🎬</button>
+                <button type="button" class="ex-help" data-demo="${i}" aria-label="How to do ${FP.esc(e.name)}" title="How to do this exercise">🎬</button>
             </li>`).join('');
         $('progressText').textContent = done + ' / ' + total + ' exercises';
         $('progressFill').style.width = (done / total * 100) + '%';
@@ -350,14 +305,12 @@ function initWorkouts() {
     function openWorkout(id, entry) {
         const plan = workoutPlans[id];
         if (!plan) return;
-        current = { id, checks: plan.exercises.map(() => false), resumeTs: null };
-        if (entry) {
-            current.resumeTs = entry.ts;
-            // restore saved progress (older entries only stored a count, so tick the first N)
-            current.checks = Array.isArray(entry.checks) && entry.checks.length === plan.exercises.length
-                ? entry.checks.map(Boolean)
-                : plan.exercises.map((_, i) => i < entry.done);
-        }
+        // continuing a saved session restores its ticks; a new start begins with nothing ticked
+        current = {
+            id,
+            sessionId: entry ? entry.id : null,
+            checks: plan.exercises.map((_, i) => !!(entry && Array.isArray(entry.checks) && entry.checks[i]))
+        };
         $('sessionTitle').textContent = plan.title;
         $('sessionDesc').textContent = plan.desc;
         renderSession();
@@ -372,6 +325,13 @@ function initWorkouts() {
         document.body.style.overflow = '';
         current = null;
         if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    }
+
+    /* Leaving without pressing Finish: progress is already saved, so say where to find it */
+    function leaveWorkout() {
+        const partly = current && current.checks.some(Boolean) && !current.checks.every(Boolean);
+        closeWorkout();
+        if (partly) toast('Progress saved. Press Continue Workout on this card to pick up where you left off.');
     }
 
     /* ── Exercise demo ──
@@ -465,19 +425,15 @@ function initWorkouts() {
         demoReturn = null;
     }
 
-    function finishWorkout() {
+    async function finishWorkout() {
         if (!current) return;
         const plan = workoutPlans[current.id];
         const done = current.checks.filter(Boolean).length;
         if (done === 0) { toast('Check off at least one exercise first.', true); return; }
-        const record = { plan: current.id, title: plan.title, done, total: plan.exercises.length, minutes: plan.minutes, date: FP.today(), ts: Date.now(), checks: current.checks.slice() };
-        const idx = current.resumeTs ? data.workouts.findIndex(w => w.ts === current.resumeTs) : -1;
-        if (idx >= 0) data.workouts[idx] = record;   // continuing: update the same entry, don't duplicate
-        else data.workouts.push(record);
-        if (!FP.save(data)) { toast('Could not save. Browser storage is unavailable.', true); return; }
         const complete = done === plan.exercises.length;
+        const ok = await saveProgress(current);   // the ticks are already saved; this makes sure the last one landed
+        if (!ok) return;
         closeWorkout();
-        renderAll();
         toast(complete ? 'Workout Complete. Great Job! 💪' : 'Workout Saved.');
     }
 
@@ -491,7 +447,11 @@ function initWorkouts() {
     });
     $('workoutGrid').addEventListener('click', e => {
         const b = e.target.closest('[data-start]');
-        if (b) openWorkout(b.dataset.start);
+        if (b) { openWorkout(b.dataset.start); return; }
+        const r = e.target.closest('[data-resume]');
+        if (!r) return;
+        const entry = sessions.find(w => String(w.id) === r.dataset.resume);
+        if (entry) openWorkout(entry.plan, entry);
     });
     $('exerciseList').addEventListener('click', e => {
         const h = e.target.closest('[data-demo]');
@@ -503,54 +463,66 @@ function initWorkouts() {
         renderSession();
         const again = $('exerciseList').querySelector(`[data-ex="${i}"]`);
         if (again) again.focus();
+        saveProgress(current);   // auto-save as in progress
     });
     $('finishBtn').addEventListener('click', finishWorkout);
-    $('sessionClose').addEventListener('click', closeWorkout);
-    $('sessionOverlay').addEventListener('click', e => { if (e.target === $('sessionOverlay')) closeWorkout(); });
+    $('sessionClose').addEventListener('click', leaveWorkout);
+    $('sessionOverlay').addEventListener('click', e => { if (e.target === $('sessionOverlay')) leaveWorkout(); });
     $('demoClose').addEventListener('click', closeDemo);
     $('demoOverlay').addEventListener('click', e => { if (e.target === $('demoOverlay')) closeDemo(); });
     document.addEventListener('keydown', e => {
         if (e.key !== 'Escape') return;
         if ($('demoOverlay').classList.contains('active')) closeDemo();
-        else if (current) closeWorkout();
+        else if (current) leaveWorkout();
     });
 
     $('historyList').addEventListener('click', e => {
         const c = e.target.closest('[data-continue]');
         if (c) {
-            const entry = data.workouts.find(w => String(w.ts) === c.dataset.continue);
+            const entry = sessions.find(w => String(w.id) === c.dataset.continue);
             if (entry) openWorkout(entry.plan, entry);
             return;
         }
         const b = e.target.closest('[data-del]');
         if (!b) return;
-        data.workouts = data.workouts.filter(w => String(w.ts) !== b.dataset.del);
-        FP.save(data);
-        renderAll();
+        api('DELETE', '/api/workout-sessions/' + encodeURIComponent(b.dataset.del))
+            .then(() => { sessions = sessions.filter(w => String(w.id) !== b.dataset.del); renderAll(); })
+            .catch(() => toast('Could not delete that entry.', true));
     });
     $('clearHistory').addEventListener('click', () => {
         if (!confirm('Delete all saved workouts?')) return;
-        data.workouts = [];
-        FP.save(data);
-        renderAll();
+        api('DELETE', '/api/workout-sessions')
+            .then(() => { sessions = []; renderAll(); })
+            .catch(() => toast('Could not clear your history.', true));
     });
 
     /* Footer links like /workouts#arm open that workout directly */
     function openFromHash() {
         const id = location.hash.slice(1);
-        if (workoutPlans[id]) { activeCat = 'all'; renderFilters(); renderCards(); openWorkout(id); }
+        if (workoutPlans[id]) { activeCat = 'all'; renderFilters(); renderCards(); openWorkout(id, unfinishedFor(id)); }
     }
     window.addEventListener('hashchange', openFromHash);
 
-    renderFilters();
-    renderAll();
-    openFromHash();
-
-
+    /* ── Start: load the workouts and this member's history from the database ── */
+    async function load() {
+        try {
+            const [plans, list] = await Promise.all([api('GET', '/api/workouts'), api('GET', '/api/workout-sessions')]);
+            workoutPlans = plans;
+            sessions = list;
+        } catch (e) {
+            toast('Could not load your workouts. Please refresh the page.', true);
+        }
+        renderFilters();
+        renderAll();
+        openFromHash();
+    }
+    load();
 }
 
 /* ── Page: diet ── */
-/* diet.html */
+/* diet.html
+   Goals, foods and meals now live in the database (see DietController).
+   Nothing is stored in the browser any more. */
 function initDiet() {
     let toastTimer;
     function toast(msg, isError) {
@@ -563,109 +535,24 @@ function initDiet() {
         toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
     }
 
-
-    const nutritionPlans = {
-        'muscle-gain': {
-            title: 'Muscle Gain Plan', desc: 'High protein and calorie surplus to support muscle growth.',
-            stats: { Calories: '2800-3200', Protein: '180-200g', Carbs: '350-400g', Fats: '80-100g' },
-            meals: ['🍳 Breakfast: Oatmeal with protein powder, banana, almonds', '🍎 Snack: Greek yogurt with berries', '🥗 Lunch: Grilled chicken, brown rice, vegetables', '🥤 Snack: Protein shake, apple', '🍽 Dinner: Salmon, sweet potato, broccoli', '🌙 Before Bed: Cottage cheese']
-        },
-        'weight-loss': {
-            title: 'Weight Loss Plan', desc: 'Lower calories to help burn fat while maintaining nutrients.',
-            stats: { Calories: '1500-1800', Protein: '120-150g', Carbs: '150-180g', Fats: '50-60g' },
-            meals: ['🍳 Breakfast: Egg whites, spinach, whole grain toast', '🍎 Snack: Apple with almond butter', '🥗 Lunch: Turkey breast, quinoa, mixed greens', '🥤 Snack: Protein smoothie', '🍽 Dinner: Grilled fish, asparagus, cauliflower rice', '🌙 Before Bed: Casein protein shake']
-        },
-        'balanced': {
-            title: 'Balanced Nutrition', desc: 'Balanced macros to maintain a healthy body weight.',
-            stats: { Calories: '2000-2400', Protein: '140-160g', Carbs: '250-280g', Fats: '65-75g' },
-            meals: ['🍳 Breakfast: Whole grain pancakes, eggs, berries', '🍎 Snack: Mixed nuts and dried fruit', '🥗 Lunch: Chicken stir-fry, brown rice, vegetables', '🥤 Snack: Hummus with veggie sticks', '🍽 Dinner: Lean beef, baked potato, green beans', '🌙 Before Bed: Greek yogurt']
-        },
-        'performance': {
-            title: 'Performance Plan', desc: 'Higher carbs and protein for energy, endurance, and recovery.',
-            stats: { Calories: '2400-2800', Protein: '140-160g', Carbs: '300-350g', Fats: '70-90g' },
-            meals: ['🍳 Breakfast: Eggs, toast, and fruit', '🍎 Snack: Protein bar', '🥗 Lunch: Chicken breast with rice and vegetables', '🥤 Snack: Protein shake', '🍽 Dinner: Salmon with sweet potatoes', '🌙 Before Bed: Greek yogurt']
-        },
-        'high-protein': {
-            title: 'High Protein Plan', desc: 'Extra protein intake to support muscle repair and strength development.',
-            stats: { Calories: '2200-2500', Protein: '180-220g', Carbs: '180-220g', Fats: '60-80g' },
-            meals: ['🍳 Breakfast: Eggs, oats, protein shake', '🍎 Snack: Peanut butter toast', '🥗 Lunch: Chicken breast, brown rice, broccoli', '🥤 Snack: Protein smoothie', '🍽 Dinner: Lean steak, sweet potato', '🌙 Before Bed: Greek yogurt']
-        },
-        'fasting': {
-            title: 'Fasting Plan', desc: 'Timed eating windows that help improve metabolism and fat burning.',
-            stats: { Calories: '1800-2000', Protein: '130-150g', Carbs: '150-180g', Fats: '60-70g' },
-            meals: ['🍳 Breakfast: Eggs, avocado, whole grain toast', '🍎 Snack: Protein shake', '🥗 Lunch: Grilled chicken, quinoa, vegetables', '🥤 Snack: Greek yogurt with berries', '🍽 Dinner: Salmon with brown rice and broccoli']
-        },
-        'keto': {
-            title: 'Keto Plan', desc: 'Low-carb, high-fat eating to shift your body into a fat-burning ketosis state.',
-            stats: { Calories: '1800-2200', Protein: '120-140g', Carbs: '20-50g', Fats: '130-160g' },
-            meals: ['🍳 Breakfast: Scrambled eggs with butter, bacon, avocado', '🍎 Snack: Almonds and string cheese', '🥗 Lunch: Tuna salad with olive oil over leafy greens', '🥤 Snack: Boiled eggs with salt', '🍽 Dinner: Ribeye steak, roasted zucchini, garlic butter', '🌙 Before Bed: Peanut butter with celery sticks']
-        },
-        'plant-based': {
-            title: 'Plant-Based Plan', desc: 'Whole-food, plant-powered meals that fuel performance and support overall wellness.',
-            stats: { Calories: '1900-2300', Protein: '100-130g', Carbs: '280-320g', Fats: '55-70g' },
-            meals: ['🍳 Breakfast: Oatmeal with chia seeds, berries, and almond butter', '🍎 Snack: Edamame with sea salt', '🥗 Lunch: Lentil and quinoa bowl with roasted veggies', '🥤 Snack: Smoothie with spinach, banana, plant protein', '🍽 Dinner: Tofu stir-fry with brown rice and broccoli', '🌙 Before Bed: Soy milk with a handful of walnuts']
-        },
-        'cut-lean': {
-            title: 'Cut & Lean Plan', desc: 'Strategic calorie cycling to shed body fat while preserving hard-earned lean muscle.',
-            stats: { Calories: '1600-2000', Protein: '160-190g', Carbs: '120-160g', Fats: '45-60g' },
-            meals: ['🍳 Breakfast: Egg white omelette, spinach, whole grain toast', '🍎 Snack: Rice cakes with cottage cheese', '🥗 Lunch: Grilled turkey, mixed greens, light vinaigrette', '🥤 Snack: Whey protein shake with water', '🍽 Dinner: Tilapia, steamed asparagus, cauliflower mash', '🌙 Before Bed: Casein protein shake']
-        }
-    };
-
-    /* Turn each plan's ranges (e.g. "2800-3200") into a single daily target (the midpoint). */
-    const mid = s => { const n = String(s).match(/\d+/g).map(Number); return Math.round(n.reduce((a, b) => a + b, 0) / n.length); };
-    Object.values(nutritionPlans).forEach(p => {
-        p.goal = { cal: mid(p.stats.Calories), p: mid(p.stats.Protein), c: mid(p.stats.Carbs), f: mid(p.stats.Fats) };
-    });
-
-    /* Approximate nutrition per serving for quick-add. */
-    const defaultFoods = [
-        { name: 'Egg (1 large)', cal: 78, p: 6, c: 0.6, f: 5 },
-        { name: 'Oatmeal (1 cup cooked)', cal: 158, p: 6, c: 27, f: 3 },
-        { name: 'Whole grain bread (1 slice)', cal: 80, p: 4, c: 14, f: 1 },
-        { name: 'Banana (1 medium)', cal: 105, p: 1.3, c: 27, f: 0.4 },
-        { name: 'Apple (1 medium)', cal: 95, p: 0.5, c: 25, f: 0.3 },
-        { name: 'Greek yogurt (170 g)', cal: 100, p: 17, c: 6, f: 0.7 },
-        { name: 'Cottage cheese (1 cup)', cal: 220, p: 25, c: 8, f: 10 },
-        { name: 'Whey protein shake (1 scoop)', cal: 120, p: 24, c: 3, f: 1.5 },
-        { name: 'Chicken breast (100 g, grilled)', cal: 165, p: 31, c: 0, f: 3.6 },
-        { name: 'Lean steak (100 g)', cal: 180, p: 27, c: 0, f: 7 },
-        { name: 'Salmon (100 g)', cal: 208, p: 20, c: 0, f: 13 },
-        { name: 'Tuna, canned in water (100 g)', cal: 116, p: 26, c: 0, f: 1 },
-        { name: 'Tofu (100 g)', cal: 76, p: 8, c: 1.9, f: 4.8 },
-        { name: 'White rice (1 cup cooked)', cal: 205, p: 4.3, c: 45, f: 0.4 },
-        { name: 'Brown rice (1 cup cooked)', cal: 216, p: 5, c: 45, f: 1.8 },
-        { name: 'Pasta (1 cup cooked)', cal: 220, p: 8, c: 43, f: 1.3 },
-        { name: 'Sweet potato (1 medium)', cal: 103, p: 2.3, c: 24, f: 0.2 },
-        { name: 'Lentils (1 cup cooked)', cal: 230, p: 18, c: 40, f: 0.8 },
-        { name: 'Broccoli (1 cup)', cal: 55, p: 3.7, c: 11, f: 0.6 },
-        { name: 'Avocado (½ fruit)', cal: 120, p: 1.5, c: 6, f: 11 },
-        { name: 'Almonds (28 g)', cal: 164, p: 6, c: 6, f: 14 },
-        { name: 'Peanut butter (1 tbsp)', cal: 94, p: 4, c: 3, f: 8 }
-    ];
-
-    /* Shared food list: managed on the admin page, falls back to the built-in list. */
-    const foodDb = (() => {
-        try {
-            const list = JSON.parse(localStorage.getItem('fitpass_admin_foods'));
-            if (Array.isArray(list) && list.length && list.every(f => f && typeof f.name === 'string' && isFinite(f.cal))) {
-                return list.map(f => ({ name: f.name, cal: +f.cal || 0, p: +f.p || 0, c: +f.c || 0, f: +f.f || 0 }));
-            }
-        } catch (e) { }
-        return defaultFoods;
-    })();
-
+    const api = apiRequest;
     const mealNames = { breakfast: '🍳 Breakfast', lunch: '🥗 Lunch', dinner: '🍽 Dinner', snack: '🍎 Snack' };
     const CIRC = 2 * Math.PI * 52;
 
-    let data = FP.data();
+    let plans = {};          // the 9 given plans from the database, keyed by slug
+    let givenFoods = [];     // foods everybody can quick-add
+    let myFoods = [];        // this member's own saved foods
+    let goals = { plan: 'balanced', cal: 2200, p: 150, c: 265, f: 70 };
+    let mealsByDay = {};     // { 'YYYY-MM-DD': [meal, meal, ...] }
+    let sessions = [];       // saved workouts, for the "Training this week" box
     let viewDate = FP.today();
     let modalPlan = null;
+    let pickedFood = null;   // id of the quick-add food that is filled in (or null)
+    let saving = false;
 
     const $ = id => document.getElementById(id);
     const round = (n, d = 0) => { const m = Math.pow(10, d); return Math.round(n * m) / m; };
-    const entriesFor = k => data.foods[k] || [];
-    const persist = () => { if (!FP.save(data)) toast('Could not save. Browser storage is unavailable.', true); };
+    const entriesFor = k => mealsByDay[k] || [];
 
     function dateText(k) {
         const t = FP.today();
@@ -677,7 +564,7 @@ function initDiet() {
 
     /* ── summary ── */
     function renderSummary() {
-        const g = data.goals;
+        const g = goals;
         const t = FP.totals(entriesFor(viewDate));
         $('dateLabel').textContent = dateText(viewDate);
         $('datePick').value = viewDate;
@@ -700,8 +587,9 @@ function initDiet() {
             $(id + 'Bar').style.width = Math.min(100, g[k] ? t[k] / g[k] * 100 : 0) + '%';
         });
 
-        $('wkCount').textContent = FP.weekCount(data.workouts);
-        $('wkStreak').textContent = FP.streak(data.workouts);
+        const finished = sessions.filter(s => s.status === 'completed');
+        $('wkCount').textContent = FP.weekCount(finished);
+        $('wkStreak').textContent = FP.streak(finished);
     }
 
     /* ── meal log ── */
@@ -730,9 +618,8 @@ function initDiet() {
     function renderChart() {
         const days = Array.from({ length: 7 }, (_, i) => FP.addDays(viewDate, i - 6));
         const cals = days.map(k => round(FP.totals(entriesFor(k)).cal));
-        const goal = data.goals.cal;
+        const goal = goals.cal;
         const max = Math.max(goal * 1.25, ...cals, 1);
-        const plotH = 220 - 46; // chart height minus label space
         $('chart').innerHTML = days.map((k, i) => {
             const h = cals[i] / max * 100;
             const d = FP.parse(k);
@@ -745,28 +632,46 @@ function initDiet() {
     }
 
     function renderGoals() {
-        const g = data.goals;
-        $('planSel').value = g.plan;
-        $('gCalIn').value = g.cal; $('gProIn').value = g.p; $('gCarbIn').value = g.c; $('gFatIn').value = g.f;
+        $('planSel').value = goals.plan;
+        $('gCalIn').value = goals.cal; $('gProIn').value = goals.p; $('gCarbIn').value = goals.c; $('gFatIn').value = goals.f;
     }
 
     function renderAll() { renderSummary(); renderMeals(); renderChart(); }
 
-    function setDate(k) { viewDate = k; renderAll(); }
+    /* ── loading meals from the database ──
+       Loads the 7 days ending on day k (the meal list and the 7-day chart both need them). */
+    async function loadWindow(k) {
+        try {
+            const list = await api('GET', '/api/meals?from=' + FP.addDays(k, -6) + '&to=' + k);
+            for (let i = -6; i <= 0; i++) mealsByDay[FP.addDays(k, i)] = [];
+            list.forEach(m => {
+                if (!mealsByDay[m.date]) mealsByDay[m.date] = [];
+                mealsByDay[m.date].push(m);
+            });
+            if (k === viewDate) renderAll();
+        } catch (err) {
+            toast(err.message, true);
+        }
+    }
+
+    function setDate(k) {
+        viewDate = k;
+        renderAll();      // show what we already have right away
+        loadWindow(k);    // then refresh from the database
+    }
 
     /* ── add food ── */
     function quickFood(v) {
         if (!v) return null;
-        const list = v[0] === 'm' ? (data.myFoods || []) : foodDb;
-        return list[Number(v.slice(1))] || null;
+        const list = v[0] === 'm' ? myFoods : givenFoods;
+        return list.find(f => f.id === Number(v.slice(1))) || null;
     }
 
     function renderQuick() {
-        const mine = data.myFoods || [];
-        const opt = (prefix, f, i) => `<option value="${prefix}${i}">${FP.esc(f.name)} · ${f.cal} kcal</option>`;
+        const opt = (prefix, f) => `<option value="${prefix}${f.id}">${FP.esc(f.name)} · ${f.cal} kcal</option>`;
         $('quick').innerHTML = '<option value="">Custom food (type below)</option>' +
-            (mine.length ? '<optgroup label="My foods">' + mine.map((f, i) => opt('m', f, i)).join('') + '</optgroup>' : '') +
-            '<optgroup label="FitPass foods">' + foodDb.map((f, i) => opt('s', f, i)).join('') + '</optgroup>';
+            (myFoods.length ? '<optgroup label="My foods">' + myFoods.map(f => opt('m', f)).join('') + '</optgroup>' : '') +
+            '<optgroup label="FitPass foods">' + givenFoods.map(f => opt('s', f)).join('') + '</optgroup>';
         $('removeSaved').hidden = true;
     }
 
@@ -774,6 +679,7 @@ function initDiet() {
         const v = $('quick').value;
         $('removeSaved').hidden = v[0] !== 'm';
         const f = quickFood(v);
+        pickedFood = f ? f.id : null;
         if (!f) return;
         const s = parseFloat($('servings').value) || 1;
         $('fName').value = f.name + (s !== 1 ? ' × ' + s : '');
@@ -783,91 +689,137 @@ function initDiet() {
         $('fFat').value = round(f.f * s, 1);
     }
 
-    renderQuick();
-    $('removeSaved').addEventListener('click', () => {
+    $('removeSaved').addEventListener('click', async () => {
         const v = $('quick').value;
         if (v[0] !== 'm') return;
         const f = quickFood(v);
-        data.myFoods.splice(Number(v.slice(1)), 1);
-        persist();
-        renderQuick();
-        $('foodForm').reset();
-        $('servings').value = 1;
-        toast('Removed ' + (f ? f.name : 'food') + ' from my foods.');
+        if (!f) return;
+        try {
+            await api('DELETE', '/api/foods/' + f.id);
+            myFoods = myFoods.filter(x => x.id !== f.id);
+            renderQuick();
+            $('foodForm').reset();
+            $('servings').value = 1;
+            pickedFood = null;
+            toast('Removed ' + f.name + ' from my foods.');
+        } catch (err) {
+            toast(err.message, true);
+        }
     });
     $('quick').addEventListener('change', applyQuick);
     $('servings').addEventListener('input', applyQuick);
+    // If the member types their own name, it is no longer the quick-add food
+    $('fName').addEventListener('input', () => { pickedFood = null; });
 
-    $('foodForm').addEventListener('submit', e => {
+    $('foodForm').addEventListener('submit', async e => {
         e.preventDefault();
+        if (saving) return;
         const name = $('fName').value.trim();
         const cal = parseFloat($('fCal').value);
         if (!name) { toast('Enter a food name.', true); $('fName').focus(); return; }
         if (!(cal >= 0)) { toast('Enter the calories for this food.', true); $('fCal').focus(); return; }
         const num = id => Math.max(0, parseFloat($(id).value) || 0);
-        const entry = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 6), meal: $('meal').value, name, cal, p: num('fPro'), c: num('fCarb'), f: num('fFat') };
-        (data.foods[viewDate] = data.foods[viewDate] || []).push(entry);
-        let saved = false;
-        if ($('saveMine').checked) {
-            /* store per single serving, and drop any "× N" added by quick add */
-            const s = parseFloat($('servings').value) || 1;
-            const base = name.replace(/\s*×\s*[\d.]+$/, '').trim() || name;
-            const rec = { name: base, cal: round(cal / s), p: round(entry.p / s, 1), c: round(entry.c / s, 1), f: round(entry.f / s, 1) };
-            data.myFoods = data.myFoods || [];
-            const at = data.myFoods.findIndex(x => x.name.toLowerCase() === base.toLowerCase());
-            if (at >= 0) data.myFoods[at] = rec; else data.myFoods.push(rec);
-            saved = true;
+        const s = parseFloat($('servings').value);
+        const day = viewDate;
+
+        saving = true;
+        try {
+            const res = await api('POST', '/api/meals', {
+                date: day,
+                meal: $('meal').value,
+                name: name,
+                servings: s > 0 ? s : 1,
+                calories: cal,
+                protein: num('fPro'),
+                carbs: num('fCarb'),
+                fats: num('fFat'),
+                food_id: pickedFood,
+                save_food: $('saveMine').checked
+            });
+
+            (mealsByDay[day] = mealsByDay[day] || []).push(res.meal);
+
+            const saved = !!res.food;
+            if (saved) {
+                const at = myFoods.findIndex(x => x.id === res.food.id);
+                if (at >= 0) myFoods[at] = res.food; else myFoods.push(res.food);
+            }
+
+            $('foodForm').reset();
+            $('servings').value = 1;
+            pickedFood = null;
+            if (saved) renderQuick();
+            $('removeSaved').hidden = true;
+            renderAll();
+            toast(saved ? 'Added ' + name + ' and saved to my foods' : 'Added ' + name);
+        } catch (err) {
+            toast(err.message, true);
+        } finally {
+            saving = false;
         }
-        persist();
-        $('foodForm').reset();
-        $('servings').value = 1;
-        if (saved) renderQuick();
-        $('removeSaved').hidden = true;
-        renderAll();
-        toast(saved ? 'Added ' + name + ' and saved to my foods' : 'Added ' + name);
     });
 
-    $('mealLog').addEventListener('click', e => {
+    $('mealLog').addEventListener('click', async e => {
         const b = e.target.closest('[data-del]');
         if (!b) return;
-        data.foods[viewDate] = entriesFor(viewDate).filter(x => x.id !== b.dataset.del);
-        if (!data.foods[viewDate].length) delete data.foods[viewDate];
-        persist();
-        renderAll();
+        const id = b.dataset.del;
+        const day = viewDate;
+        b.disabled = true;
+        try {
+            await api('DELETE', '/api/meals/' + encodeURIComponent(id));
+            mealsByDay[day] = entriesFor(day).filter(x => String(x.id) !== id);
+            renderAll();
+        } catch (err) {
+            b.disabled = false;
+            toast(err.message, true);
+        }
     });
 
     /* ── goals + plans ── */
-    $('planSel').innerHTML = '<option value="custom">Custom goals</option>' +
-        Object.entries(nutritionPlans).map(([id, p]) => `<option value="${id}">${p.title}</option>`).join('');
-
     function fillFromPlan(id) {
-        const p = nutritionPlans[id];
+        const p = plans[id];
         if (!p) return;
         $('gCalIn').value = p.goal.cal; $('gProIn').value = p.goal.p; $('gCarbIn').value = p.goal.c; $('gFatIn').value = p.goal.f;
     }
     $('planSel').addEventListener('change', () => fillFromPlan($('planSel').value));
     ['gCalIn', 'gProIn', 'gCarbIn', 'gFatIn'].forEach(id => $(id).addEventListener('input', () => { $('planSel').value = 'custom'; }));
 
-    function saveGoals() {
+    async function saveGoals() {
+        if (saving) return;
         const cal = parseInt($('gCalIn').value, 10), p = parseInt($('gProIn').value, 10),
             c = parseInt($('gCarbIn').value, 10), f = parseInt($('gFatIn').value, 10);
         if (!(cal >= 500) || [p, c, f].some(v => !(v >= 0))) { toast('Enter valid goals (calories at least 500).', true); return; }
-        data.goals = { plan: $('planSel').value, cal, p, c, f };
-        persist();
-        renderAll();
-        toast('Goals Saved.');
+
+        saving = true;
+        try {
+            const res = await api('POST', '/api/goals', {
+                plan: $('planSel').value,
+                calories: cal,
+                protein: p,
+                carbs: c,
+                fats: f
+            });
+            goals = res.goals;
+            renderGoals();
+            renderAll();
+            toast('Goals Saved.');
+        } catch (err) {
+            toast(err.message, true);
+        } finally {
+            saving = false;
+        }
     }
     $('saveGoals').addEventListener('click', saveGoals);
 
     function openPlan(id) {
-        const plan = nutritionPlans[id];
+        const plan = plans[id];
         if (!plan) { toast('Choose a nutrition plan first.', true); return; }
         modalPlan = id;
         $('planTitle').textContent = plan.title;
         $('planDesc').textContent = plan.desc;
         $('planStats').innerHTML = Object.entries(plan.stats).map(([l, v]) =>
-            `<div class="modal-stat-box"><span class="modal-stat-label">${l}</span><span class="modal-stat-value">${v}</span></div>`).join('');
-        $('planMeals').innerHTML = plan.meals.map(m => `<li>${m}</li>`).join('');
+            `<div class="modal-stat-box"><span class="modal-stat-label">${FP.esc(l)}</span><span class="modal-stat-value">${FP.esc(v)}</span></div>`).join('');
+        $('planMeals').innerHTML = plan.meals.map(m => `<li>${FP.esc(m)}</li>`).join('');
         $('planOverlay').classList.add('active');
         document.body.style.overflow = 'hidden';
         $('planClose').focus();
@@ -883,6 +835,7 @@ function initDiet() {
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalPlan) closePlan(); });
     $('usePlan').addEventListener('click', () => {
         const id = modalPlan;
+        if (!id) return;
         $('planSel').value = id;
         fillFromPlan(id);
         closePlan();
@@ -899,10 +852,33 @@ function initDiet() {
         if (b) setDate(b.dataset.day);
     });
 
-    renderGoals();
-    renderAll();
+    /* ── start: load everything from the database ── */
+    async function load() {
+        try {
+            const [diet, list] = await Promise.all([
+                api('GET', '/api/diet'),
+                api('GET', '/api/workout-sessions').catch(() => [])
+            ]);
+            plans = diet.plans;
+            goals = diet.goals;
+            givenFoods = diet.foods.given;
+            myFoods = diet.foods.mine;
+            sessions = list;
+        } catch (err) {
+            toast(err.message, true);
+            return;
+        }
 
+        $('planSel').innerHTML = '<option value="custom">Custom goals</option>' +
+            Object.entries(plans).map(([id, p]) => `<option value="${id}">${FP.esc(p.title)}</option>`).join('');
 
+        renderQuick();
+        renderGoals();
+        renderAll();
+        loadWindow(viewDate);
+    }
+
+    load();
 }
 
 /* ── Page: about ── */
