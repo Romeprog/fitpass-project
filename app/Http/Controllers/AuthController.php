@@ -49,6 +49,15 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        // A suspended member (set in the admin panel) can not log in.
+        // Only said when the password is right, so the message does not reveal who has an account.
+        $member = User::where('email', $credentials['email'])->where('role', 'user')->first();
+        if ($member && $member->status === 'suspended' && Hash::check($credentials['password'], $member->password)) {
+            return back()
+                ->withErrors(['email' => 'This account is suspended. Please contact the admin.'])
+                ->onlyInput('email');
+        }
+
         // Members only: admin accounts must use the separate admin login (/admin/login)
         if (Auth::attempt($credentials + ['role' => 'user'])) {
             $request->session()->regenerate();

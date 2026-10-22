@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DietController;
 use App\Http\Controllers\HomeController;
@@ -61,6 +62,31 @@ Route::prefix('admin')->group(function () {
     // Uses your teammate's AdminMiddleware (alias "admin")
     Route::middleware('admin')->group(function () {
         Route::view('/', 'admin')->name('admin');
+
+        // Data for the admin panel (JSON, used by public/js/script.js)
+        Route::get('/api/data', [AdminController::class, 'data'])->name('admin.api.data');
+
+        // Members
+        Route::post('/api/members', [AdminController::class, 'createMember'])->name('admin.api.members.create');
+        Route::patch('/api/members/{user}/status', [AdminController::class, 'setMemberStatus'])->name('admin.api.members.status');
+        Route::post('/api/members/{user}/goals', [AdminController::class, 'saveMemberGoals'])->name('admin.api.members.goals');
+        Route::delete('/api/members/{user}', [AdminController::class, 'deleteMember'])->name('admin.api.members.destroy');
+
+        // Workouts
+        Route::post('/api/workouts', [AdminController::class, 'createWorkout'])->name('admin.api.workouts.create');
+        Route::put('/api/workouts/{workout}', [AdminController::class, 'updateWorkout'])->name('admin.api.workouts.update');
+        Route::delete('/api/workouts/{workout}', [AdminController::class, 'deleteWorkout'])->name('admin.api.workouts.destroy');
+
+        // Foods
+        Route::post('/api/foods', [AdminController::class, 'createFood'])->name('admin.api.foods.create');
+        Route::put('/api/foods/{food}', [AdminController::class, 'updateFood'])->name('admin.api.foods.update');
+        Route::delete('/api/foods/{food}', [AdminController::class, 'deleteFood'])->name('admin.api.foods.destroy');
+
+        // Nutrition plans
+        Route::post('/api/plans', [AdminController::class, 'createPlan'])->name('admin.api.plans.create');
+        Route::put('/api/plans/{plan}', [AdminController::class, 'updatePlan'])->name('admin.api.plans.update');
+        Route::delete('/api/plans/{plan}', [AdminController::class, 'deletePlan'])->name('admin.api.plans.destroy');
+
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
     });
 });
