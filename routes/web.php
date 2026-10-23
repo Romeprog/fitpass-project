@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DietController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\WorkoutController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,7 +21,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
-// Only for logged-in users
+// Only for logged-in members
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -25,14 +29,64 @@ Route::middleware('auth')->group(function () {
     Route::view('/workouts', 'workouts')->name('workouts');
     Route::view('/diet', 'diet')->name('diet');
     Route::view('/about', 'about')->name('about');
+
+    // JSON endpoints used by public/js/script.js (login session + CSRF token, no API tokens)
+    Route::prefix('api')->group(function () {
+        Route::get('/workouts', [WorkoutController::class, 'catalog'])->name('api.workouts');
+
+        Route::get('/workout-sessions', [WorkoutController::class, 'sessions'])->name('api.workout-sessions');
+        Route::post('/workout-sessions', [WorkoutController::class, 'save'])->name('api.workout-sessions.save');
+        Route::delete('/workout-sessions/{workoutSession}', [WorkoutController::class, 'destroy'])->name('api.workout-sessions.destroy');
+        Route::delete('/workout-sessions', [WorkoutController::class, 'clear'])->name('api.workout-sessions.clear');
+
+        // Home page summary
+        Route::get('/home', [HomeController::class, 'summary'])->name('api.home');
+
+        // Diet tracker
+        Route::get('/diet', [DietController::class, 'index'])->name('api.diet');
+        Route::post('/goals', [DietController::class, 'saveGoals'])->name('api.goals.save');
+
+        Route::get('/meals', [DietController::class, 'meals'])->name('api.meals');
+        Route::post('/meals', [DietController::class, 'addMeal'])->name('api.meals.add');
+        Route::delete('/meals/{meal}', [DietController::class, 'deleteMeal'])->name('api.meals.destroy');
+
+        Route::delete('/foods/{food}', [DietController::class, 'deleteFood'])->name('api.foods.destroy');
+    });
 });
 
-// Admin area: its own login and its own "admin" guard, separate from member accounts
+// Admin area
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
     Route::post('/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
-    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-});
 
-// Only for a signed-in admin (uses the admin guard, not the member login)
-Route::view('/admin', 'admin')->middleware('admin')->name('admin');
+    // Uses your teammate's AdminMiddleware (alias "admin")
+    Route::middleware('admin')->group(function () {
+        Route::view('/', 'admin')->name('admin');
+
+        // Data for the admin panel (JSON, used by public/js/script.js)
+        Route::get('/api/data', [AdminController::class, 'data'])->name('admin.api.data');
+
+        // Members
+        Route::post('/api/members', [AdminController::class, 'createMember'])->name('admin.api.members.create');
+        Route::patch('/api/members/{user}/status', [AdminController::class, 'setMemberStatus'])->name('admin.api.members.status');
+        Route::post('/api/members/{user}/goals', [AdminController::class, 'saveMemberGoals'])->name('admin.api.members.goals');
+        Route::delete('/api/members/{user}', [AdminController::class, 'deleteMember'])->name('admin.api.members.destroy');
+
+        // Workouts
+        Route::post('/api/workouts', [AdminController::class, 'createWorkout'])->name('admin.api.workouts.create');
+        Route::put('/api/workouts/{workout}', [AdminController::class, 'updateWorkout'])->name('admin.api.workouts.update');
+        Route::delete('/api/workouts/{workout}', [AdminController::class, 'deleteWorkout'])->name('admin.api.workouts.destroy');
+
+        // Foods
+        Route::post('/api/foods', [AdminController::class, 'createFood'])->name('admin.api.foods.create');
+        Route::put('/api/foods/{food}', [AdminController::class, 'updateFood'])->name('admin.api.foods.update');
+        Route::delete('/api/foods/{food}', [AdminController::class, 'deleteFood'])->name('admin.api.foods.destroy');
+
+        // Nutrition plans
+        Route::post('/api/plans', [AdminController::class, 'createPlan'])->name('admin.api.plans.create');
+        Route::put('/api/plans/{plan}', [AdminController::class, 'updatePlan'])->name('admin.api.plans.update');
+        Route::delete('/api/plans/{plan}', [AdminController::class, 'deletePlan'])->name('admin.api.plans.destroy');
+
+        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+    });
+});

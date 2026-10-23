@@ -12,14 +12,25 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Seed the application's database.
+     * Safe to run more than once (php artisan db:seed).
      */
     public function run(): void
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Only create the test user if it does not exist yet (a second run used to fail on the duplicate email)
+        if (! User::where('email', 'test@example.com')->exists()) {
+            User::factory()->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+            ]);
+        }
+
+        $this->call([
+            AdminSeeder::class,
+            GoalPresetSeeder::class,
+            WorkoutSeeder::class,
+            FoodSeeder::class,
         ]);
     }
 }
