@@ -943,9 +943,6 @@ function initAdmin() {
     const fmtDate = k => k ? new Date(k + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
     const planTitle = slug => { const p = plans.find(x => x.slug === slug); return p ? p.title : 'Custom goals'; };
 
-    /* "Reset demo data" does not exist any more: the data is real now */
-    $('resetBtn').style.display = 'none';
-
     /* ── bars helper ── */
     function bars(rows, green) {
         if (!rows.length) return '<p class="empty">No data yet.</p>';
@@ -1237,7 +1234,6 @@ function initAdmin() {
     $('modal').addEventListener('click', e => { if (e.target === $('modal')) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    $('addUserBtn').addEventListener('click', userForm);
     $('addWorkoutBtn').addEventListener('click', () => workoutForm(null));
     $('addFoodBtn').addEventListener('click', () => foodForm(null));
     $('addGoalPlanBtn').addEventListener('click', () => goalPlanForm(null));
@@ -1304,7 +1300,7 @@ function initAdmin() {
         a.download = 'fitpass-members.csv';
         a.click();
         URL.revokeObjectURL(a.href);
-        toast('Members exported.');
+        toast('Members Exported.');
     });
 
     /* ── tabs ── */

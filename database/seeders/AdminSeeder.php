@@ -12,7 +12,7 @@ class AdminSeeder extends Seeder
     {
         $admin = User::firstOrNew(['email' => 'fitpass.admin@gmail.com']);
         $admin->name = 'Admin';
-        $admin->password = Hash::make('12345678');
+        $admin->password = Hash::make('fitpass_admin123');
         $admin->role = 'admin';
         $admin->save();
     }

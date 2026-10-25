@@ -76,7 +76,6 @@
                         <h2>Members</h2>
                         <div class="head-actions">
                             <input class="search" id="userSearch" type="search" placeholder="Search name or email">
-                            <button class="cta-btn" id="addUserBtn" type="button">+ Add Member</button>
                         </div>
                     </div>
                     <div class="table-wrap">
@@ -201,8 +200,7 @@
                     <div class="section-head">
                         <h2>Reports</h2>
                         <div class="head-actions">
-                            <button class="btn-ghost" id="exportBtn" type="button">Export members (CSV)</button>
-                            <button class="btn-ghost" id="resetBtn" type="button">Reset demo data</button>
+                            <button class="btn-ghost" id="exportBtn" type="button">Export Members (CSV)</button>
                         </div>
                     </div>
                     <div class="grid-2">
