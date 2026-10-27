@@ -943,9 +943,6 @@ function initAdmin() {
     const fmtDate = k => k ? new Date(k + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
     const planTitle = slug => { const p = plans.find(x => x.slug === slug); return p ? p.title : 'Custom goals'; };
 
-    /* "Reset demo data" does not exist any more: the data is real now */
-    $('resetBtn').style.display = 'none';
-
     /* ── bars helper ── */
     function bars(rows, green) {
         if (!rows.length) return '<p class="empty">No data yet.</p>';
@@ -1006,6 +1003,7 @@ function initAdmin() {
                 <td><span class="pill${u.status === 'active' ? '' : ' off'}">${esc(u.status)}</span></td>
                 <td class="actions">
                     <button class="btn-mini" type="button" data-toggle="${u.id}">${u.status === 'active' ? 'Suspend' : 'Activate'}</button>
+                    <button class="btn-mini" type="button" data-resetpw="${u.id}">Reset password</button>
                     <button class="btn-mini danger" type="button" data-deluser="${u.id}">Delete</button>
                 </td></tr>`).join('') : '<tr><td colspan="6" class="empty">No members found.</td></tr>';
     }
@@ -1127,6 +1125,7 @@ function initAdmin() {
     }
     function closeModal() {
         $('modal').classList.remove('active');
+        $('mBody').innerHTML = '';   // nothing stays behind, for example a new password
         if (modalReturn && document.body.contains(modalReturn)) modalReturn.focus();
     }
     const val = id => $(id).value.trim();
@@ -1232,12 +1231,55 @@ function initAdmin() {
         ['mgCal', 'mgP', 'mgC', 'mgF'].forEach(id => $(id).addEventListener('input', () => { $('mgPlan').value = 'custom'; }));
     }
 
+    /* ── reset a member's password (for members who forgot theirs) ── */
+    function passwordResetForm(userId) {
+        const u = members.find(x => String(x.id) === String(userId));
+        if (!u) return;
+        openModal('Reset password', u.name,
+            '<p class="sub" style="margin:0 0 4px;line-height:1.5">This makes a new temporary password for ' + esc(u.name) +
+            ' and shows it here once. Their old password stops working right away. Give the new one to the member.</p>', async () => {
+                let res;
+                try {
+                    res = await apiRequest('POST', '/admin/api/members/' + u.id + '/password');
+                } catch (err) {
+                    toast(err.message, true);
+                    return false;
+                }
+                showTempPassword(u, res.password);
+                return false;   // keep the window open so the password can be read
+            });
+        $('mSave').textContent = 'Make new password';
+    }
+
+    function showTempPassword(u, password) {
+        $('mTitle').textContent = 'New password';
+        $('mSub').textContent = u.name;
+        $('mBody').innerHTML = `<div class="field full"><label for="tmpPw">Temporary password</label>
+                <input id="tmpPw" type="text" readonly value="${esc(password)}" autocomplete="off"></div>
+            <p class="sub" style="margin:8px 0 0;line-height:1.5">Shown only this once. Give it to ${esc(u.name)} and ask them to keep it private.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" id="tmpCopy">Copy</button>
+                <button type="button" class="btn-red" id="tmpDone">Done</button></div>`;
+        const box = $('tmpPw');
+        box.addEventListener('focus', () => box.select());
+        box.focus();
+        $('tmpCopy').addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(password);
+                toast('Copied.');
+            } catch (e) {
+                box.select();
+                try { document.execCommand('copy'); toast('Copied.'); } catch (e2) { toast('Press Ctrl+C to copy it.', true); }
+            }
+        });
+        $('tmpDone').addEventListener('click', closeModal);
+    }
+
     /* ── events ── */
     $('mClose').addEventListener('click', closeModal);
     $('modal').addEventListener('click', e => { if (e.target === $('modal')) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    $('addUserBtn').addEventListener('click', userForm);
     $('addWorkoutBtn').addEventListener('click', () => workoutForm(null));
     $('addFoodBtn').addEventListener('click', () => foodForm(null));
     $('addGoalPlanBtn').addEventListener('click', () => goalPlanForm(null));
@@ -1258,6 +1300,8 @@ function initAdmin() {
             const ok = await act('PATCH', '/admin/api/members/' + u.id + '/status', { status: next });
             if (ok) toast(u.name + ' is now ' + next + '.');
             else t.disabled = false;
+        } else if (t.dataset.resetpw) {
+            passwordResetForm(t.dataset.resetpw);
         } else if (t.dataset.deluser) {
             const u = byId(members, t.dataset.deluser);
             if (u && confirm('Delete ' + u.name + '? Their meals, goals and saved workouts are deleted too. This cannot be undone.')) {
@@ -1304,7 +1348,7 @@ function initAdmin() {
         a.download = 'fitpass-members.csv';
         a.click();
         URL.revokeObjectURL(a.href);
-        toast('Members exported.');
+        toast('Members Exported.');
     });
 
     /* ── tabs ── */

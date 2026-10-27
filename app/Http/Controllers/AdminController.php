@@ -158,6 +158,33 @@ class AdminController extends Controller
     }
 
     /**
+     * Give a member a new temporary password. This is for members who forgot theirs:
+     * the admin reads the new password out once and passes it on. It is not saved anywhere
+     * in plain text. Any reset link already emailed to the member stops working.
+     */
+    public function resetMemberPassword(User $user): JsonResponse
+    {
+        $this->onlyMembers($user);
+
+        // 10 characters, without look-alikes such as 0 / O and 1 / l / I
+        $alphabet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $password = '';
+        for ($i = 0; $i < 10; $i++) {
+            $password .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+        }
+
+        // The User model scrambles the password for us
+        $user->forceFill([
+            'password' => $password,
+            'remember_token' => Str::random(60),
+        ])->save();
+
+        DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+
+        return response()->json(['password' => $password])->header('Cache-Control', 'no-store');
+    }
+
+    /**
      * Set a member's daily goals (a given plan or custom numbers).
      * If the numbers do not match the chosen plan, they are saved as "custom".
      */

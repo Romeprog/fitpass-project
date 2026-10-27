@@ -76,7 +76,7 @@
                         <h2>Members</h2>
                         <div class="head-actions">
                             <input class="search" id="userSearch" type="search" placeholder="Search name or email">
-                            <button class="cta-btn" id="addUserBtn" type="button">+ Add Member</button>
+                           
                         </div>
                     </div>
                     <div class="table-wrap">

@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DietController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\WorkoutController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +21,12 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+
+    // Forgot password (emails the member a one-time link)
+    Route::get('/forgot-password', [PasswordResetController::class, 'showForgot'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showReset'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
 // Only for logged-in members
@@ -29,6 +37,12 @@ Route::middleware('auth')->group(function () {
     Route::view('/workouts', 'workouts')->name('workouts');
     Route::view('/diet', 'diet')->name('diet');
     Route::view('/about', 'about')->name('about');
+
+    // My account: change password (limited to 6 tries a minute)
+    Route::get('/account', [AccountController::class, 'show'])->name('account');
+    Route::post('/account/password', [AccountController::class, 'updatePassword'])
+        ->middleware('throttle:6,1')
+        ->name('account.password');
 
     // JSON endpoints used by public/js/script.js (login session + CSRF token, no API tokens)
     Route::prefix('api')->group(function () {
@@ -70,6 +84,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/api/members', [AdminController::class, 'createMember'])->name('admin.api.members.create');
         Route::patch('/api/members/{user}/status', [AdminController::class, 'setMemberStatus'])->name('admin.api.members.status');
         Route::post('/api/members/{user}/goals', [AdminController::class, 'saveMemberGoals'])->name('admin.api.members.goals');
+        Route::post('/api/members/{user}/password', [AdminController::class, 'resetMemberPassword'])->name('admin.api.members.password');
         Route::delete('/api/members/{user}', [AdminController::class, 'deleteMember'])->name('admin.api.members.destroy');
 
         // Workouts
