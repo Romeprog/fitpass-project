@@ -76,7 +76,6 @@
                     <div class="today" aria-label="Example of the FitPass daily summary">
                         <div class="today-head">
                             <h3>Your day at a glance</h3>
-                            <span class="tag">Example</span>
                         </div>
                         <div class="ring-row">
                             <div class="ring">
