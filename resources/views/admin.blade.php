@@ -202,7 +202,6 @@
                         <h2>Reports</h2>
                         <div class="head-actions">
                             <button class="btn-ghost" id="exportBtn" type="button">Export members (CSV)</button>
-                            <button class="btn-ghost" id="resetBtn" type="button">Reset demo data</button>
                         </div>
                     </div>
                     <div class="grid-2">
