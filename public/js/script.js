@@ -1003,7 +1003,6 @@ function initAdmin() {
                 <td><span class="pill${u.status === 'active' ? '' : ' off'}">${esc(u.status)}</span></td>
                 <td class="actions">
                     <button class="btn-mini" type="button" data-toggle="${u.id}">${u.status === 'active' ? 'Suspend' : 'Activate'}</button>
-                    <button class="btn-mini" type="button" data-resetpw="${u.id}">Reset password</button>
                     <button class="btn-mini danger" type="button" data-deluser="${u.id}">Delete</button>
                 </td></tr>`).join('') : '<tr><td colspan="6" class="empty">No members found.</td></tr>';
     }
