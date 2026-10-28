@@ -188,7 +188,6 @@
                                     <th>Protein</th>
                                     <th>Carbs</th>
                                     <th>Fats</th>
-                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody id="memberGoalRows"></tbody>

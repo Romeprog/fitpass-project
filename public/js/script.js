@@ -1057,10 +1057,8 @@ function initAdmin() {
                 ${g ? `<td><span class="pill lvl">${esc(planTitle(g.plan))}</span></td>
                 <td>${g.cal} kcal</td><td>${g.p} g</td><td>${g.c} g</td><td>${g.f} g</td>`
                     : '<td colspan="5" class="empty" style="text-align:left">No goals set yet</td>'}
-                <td class="actions">
-                    <button class="btn-mini" type="button" data-editg="${u.id}">${g ? 'Edit' : 'Set goals'}</button>
-                </td></tr>`;
-        }).join('') : '<tr><td colspan="7" class="empty">No members found.</td></tr>';
+                </tr>`;
+        }).join('') : '<tr><td colspan="6" class="empty">No members found.</td></tr>';
     }
 
     function renderAll() { renderStats(); renderOverview(); renderUsers(); renderWorkouts(); renderFoods(); renderGoals(); renderReports(); }
@@ -1206,74 +1204,6 @@ function initAdmin() {
         });
     }
 
-    function memberGoalForm(userId) {
-        const u = members.find(x => String(x.id) === String(userId));
-        if (!u) return;
-        const g = u.goal || { plan: 'balanced', cal: 2200, p: 150, c: 265, f: 70 };
-        const opts = '<option value="custom"' + (plans.some(p => p.slug === g.plan) ? '' : ' selected') + '>Custom goals</option>' +
-            plans.map(p => `<option value="${esc(p.slug)}"${p.slug === g.plan ? ' selected' : ''}>${esc(p.title)}</option>`).join('');
-        openModal('Daily Goals', u.name, `
-                <div class="field full"><label for="mgPlan">Nutrition plan</label><select id="mgPlan">${opts}</select></div>
-                <div class="field"><label for="mgCal">Calories (kcal)</label><input id="mgCal" type="number" min="500" value="${g.cal}"></div>
-                <div class="field"><label for="mgP">Protein (g)</label><input id="mgP" type="number" min="0" value="${g.p}"></div>
-                <div class="field"><label for="mgC">Carbs (g)</label><input id="mgC" type="number" min="0" value="${g.c}"></div>
-                <div class="field"><label for="mgF">Fats (g)</label><input id="mgF" type="number" min="0" value="${g.f}"></div>`, () => {
-            const body = { plan: val('mgPlan'), calories: Math.round(num('mgCal')), protein: num('mgP'), carbs: num('mgC'), fats: num('mgF') };
-            if (!(body.calories >= 500) || [body.protein, body.carbs, body.fats].some(v => !(v >= 0))) { toast('Enter valid goals (calories at least 500).', true); return false; }
-            return act('POST', '/admin/api/members/' + u.id + '/goals', body, 'Goals saved for ' + u.name + '.');
-        });
-        $('mgPlan').addEventListener('change', () => {
-            const p = plans.find(x => x.slug === $('mgPlan').value);
-            if (!p) return;
-            $('mgCal').value = p.cal; $('mgP').value = p.p; $('mgC').value = p.c; $('mgF').value = p.f;
-        });
-        ['mgCal', 'mgP', 'mgC', 'mgF'].forEach(id => $(id).addEventListener('input', () => { $('mgPlan').value = 'custom'; }));
-    }
-
-    /* ── reset a member's password (for members who forgot theirs) ── */
-    function passwordResetForm(userId) {
-        const u = members.find(x => String(x.id) === String(userId));
-        if (!u) return;
-        openModal('Reset password', u.name,
-            '<p class="sub" style="margin:0 0 4px;line-height:1.5">This makes a new temporary password for ' + esc(u.name) +
-            ' and shows it here once. Their old password stops working right away. Give the new one to the member.</p>', async () => {
-                let res;
-                try {
-                    res = await apiRequest('POST', '/admin/api/members/' + u.id + '/password');
-                } catch (err) {
-                    toast(err.message, true);
-                    return false;
-                }
-                showTempPassword(u, res.password);
-                return false;   // keep the window open so the password can be read
-            });
-        $('mSave').textContent = 'Make new password';
-    }
-
-    function showTempPassword(u, password) {
-        $('mTitle').textContent = 'New password';
-        $('mSub').textContent = u.name;
-        $('mBody').innerHTML = `<div class="field full"><label for="tmpPw">Temporary password</label>
-                <input id="tmpPw" type="text" readonly value="${esc(password)}" autocomplete="off"></div>
-            <p class="sub" style="margin:8px 0 0;line-height:1.5">Shown only this once. Give it to ${esc(u.name)} and ask them to keep it private.</p>
-            <div class="modal-actions">
-                <button type="button" class="btn-cancel" id="tmpCopy">Copy</button>
-                <button type="button" class="btn-red" id="tmpDone">Done</button></div>`;
-        const box = $('tmpPw');
-        box.addEventListener('focus', () => box.select());
-        box.focus();
-        $('tmpCopy').addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(password);
-                toast('Copied.');
-            } catch (e) {
-                box.select();
-                try { document.execCommand('copy'); toast('Copied.'); } catch (e2) { toast('Press Ctrl+C to copy it.', true); }
-            }
-        });
-        $('tmpDone').addEventListener('click', closeModal);
-    }
-
     /* ── events ── */
     $('mClose').addEventListener('click', closeModal);
     $('modal').addEventListener('click', e => { if (e.target === $('modal')) closeModal(); });
@@ -1299,8 +1229,6 @@ function initAdmin() {
             const ok = await act('PATCH', '/admin/api/members/' + u.id + '/status', { status: next });
             if (ok) toast(u.name + ' is now ' + next + '.');
             else t.disabled = false;
-        } else if (t.dataset.resetpw) {
-            passwordResetForm(t.dataset.resetpw);
         } else if (t.dataset.deluser) {
             const u = byId(members, t.dataset.deluser);
             if (u && confirm('Delete ' + u.name + '? Their meals, goals and saved workouts are deleted too. This cannot be undone.')) {
@@ -1323,8 +1251,6 @@ function initAdmin() {
                 t.disabled = true;
                 if (!(await act('DELETE', '/admin/api/plans/' + p.id, undefined, 'Plan deleted.'))) t.disabled = false;
             }
-        } else if (t.dataset.editg) {
-            memberGoalForm(t.dataset.editg);
         } else if (t.dataset.editf) {
             foodForm(t.dataset.editf);
         } else if (t.dataset.delf) {
