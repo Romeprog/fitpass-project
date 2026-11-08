@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FitPass – Workouts, meals and goals in one place</title>
+    <title>FitPass</title>
     <meta name="description"
         content="FitPass gives you guided workouts, a diet tracker with daily calorie and macro goals, and a streak that keeps you consistent.">
     <link rel="preconnect" href="https://fonts.googleapis.com">

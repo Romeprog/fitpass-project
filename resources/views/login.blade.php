@@ -24,8 +24,8 @@
             @endif
 
             <div class="input-box">
-                <input type="email" id="email" name="email" value="{{ old('email', $rememberedEmail) }}" placeholder="Email"
-                    autocomplete="email" required>
+                <input type="email" id="email" name="email" value="{{ old('email', $rememberedEmail) }}"
+                    placeholder="Email" autocomplete="email" required>
                 <span class="input-icon">✉️</span>
             </div>
             @error('email')
@@ -51,5 +51,40 @@
                 <p>Don't have an account? <a href="{{ route('register') }}">Sign Up</a></p>
             </div>
         </form>
+
+        {{-- Demo accounts (for professor / testers) --}}
+        <div class="acct-box">
+            <div class="acct-divider"><span>DEMO ACCOUNTS</span></div>
+            <div class="acct-sub">Use these to try out the system</div>
+
+            <div class="acct-card acct-user">
+                <div class="acct-head">
+                    <span class="acct-icon">👤</span>
+                    <span class="acct-role">USER</span>
+                    <span class="acct-tag">THIS PAGE</span>
+                </div>
+                <div class="acct-row"><span class="acct-label">Email</span><code>ronald123@gmail.com</code></div>
+                <div class="acct-row"><span class="acct-label">Password</span><code>ronald123</code></div>
+                <div class="acct-link">
+                    <a href="https://fit-pass.ccs-hinigaran.com/login">fit-pass.ccs-hinigaran.com/login</a>
+                </div>
+            </div>
+
+            <div class="acct-card acct-admin">
+                <div class="acct-head">
+                    <span class="acct-icon">🛠️</span>
+                    <span class="acct-role">ADMIN</span>
+                    <span class="acct-tag">SEPARATE LOGIN</span>
+                </div>
+                <div class="acct-row"><span class="acct-label">Email</span><code>fitpass.admin@gmail.com</code></div>
+                <div class="acct-row"><span class="acct-label">Password</span><code>fitpass_admin123</code></div>
+                <a class="acct-btn" href="https://fit-pass.ccs-hinigaran.com/admin/login">GO TO ADMIN LOGIN →</a>
+                <div class="acct-link">
+                    <a href="https://fit-pass.ccs-hinigaran.com/admin/login">fit-pass.ccs-hinigaran.com/admin/login</a>
+                </div>
+            </div>
+        </div>
     </div>
+
+
 @endsection
